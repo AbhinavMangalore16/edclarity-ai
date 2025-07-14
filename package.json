@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "db:push": "drizzle-kit push",
+    "db:push": "dotenv -e .env -- drizzle-kit push",
     "db:generate": "drizzle-kit generate",
     "db:reset": "drizzle-kit reset",
     "db:migrate": "drizzle-kit migrate",

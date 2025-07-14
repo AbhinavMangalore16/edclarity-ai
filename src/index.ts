@@ -1,7 +1,8 @@
 import { drizzle } from 'drizzle-orm/neon-http';
 import {neon} from '@neondatabase/serverless';
+import * as schema from './db/schema';
 if (!process.env.DB_URL) {
-  throw new Error('DB_URL environment variable is not set');
+  throw new Error('Environment variable DB_URL is missing');
 }
 const sql = neon(process.env.DB_URL);
-export const db = drizzle(sql);
+export const db = drizzle(sql, {schema, logger: true});
