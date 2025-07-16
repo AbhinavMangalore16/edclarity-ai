@@ -49,11 +49,13 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff] font-sans px-4">
-      <div className="relative w-[768px] min-h-[480px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700">
+      <div className={clsx("relative w-[768px] min-h-[480px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700", {
+        "active": isSigningUp
+      })}>
         {/* Sign In Form */}
-        <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700", {
-          "translate-x-full opacity-0 z-10": isSigningUp,
-          "z-20": !isSigningUp,
+        <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700 ease-in-out", {
+          "left-0 opacity-100 z-20": !isSigningUp,
+          "-left-full opacity-0 z-10": isSigningUp,
         })}>
           <h2 className="text-2xl font-bold mb-6 text-center">Sign In</h2>
           <Input
@@ -73,9 +75,9 @@ export default function AuthPage() {
         </div>
 
         {/* Sign Up Form */}
-        <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700", {
-          "translate-x-full opacity-100 z-20 animate-fadeIn": isSigningUp,
-          "opacity-0 z-10": !isSigningUp,
+        <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700 ease-in-out", {
+          "left-full w-1/2 opacity-0 z-10": !isSigningUp,
+          "left-0 w-1/2 opacity-100 z-30 translate-x-full": isSigningUp,
         })}>
           <h2 className="text-2xl font-bold mb-6 text-center">Create Account</h2>
           <Input
@@ -102,7 +104,7 @@ export default function AuthPage() {
 
         {/* Toggle Panel */}
         <div className={clsx(
-          "absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 z-30",
+          "absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 ease-in-out z-30",
           isSigningUp
             ? "-translate-x-full rounded-[0_150px_100px_0]"
             : "translate-x-0 rounded-[150px_0_0_100px]"
@@ -116,7 +118,7 @@ export default function AuthPage() {
             </p>
             <Button
               variant="outline"
-              className="text-white border-white"
+              className="text-white border-white bg-white/20 backdrop-blur-sm hover:bg-white/30 transition"
               onClick={() => setIsSigningUp(!isSigningUp)}
             >
               {isSigningUp ? "Sign In" : "Sign Up"}
