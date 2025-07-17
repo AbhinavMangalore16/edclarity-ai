@@ -49,7 +49,83 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff] font-sans px-4">
-      <div className={clsx("relative w-[768px] min-h-[480px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700", {
+      {/* Mobile Layout */}
+      <div className="w-full max-w-lg md:hidden">
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+          {/* Top Banner */}
+          <div className="h-48 bg-cover bg-center relative"
+            style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
+            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+              <h2 className="text-2xl font-bold text-white">
+                {isSigningUp ? "Welcome Back!" : "New here?"}
+              </h2>
+            </div>
+          </div>
+
+          {/* Form Container */}
+          <div className="p-8">
+            {!isSigningUp ? (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-center">Sign In</h2>
+                <Input
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button className="w-full" onClick={handleSignIn}>Sign In</Button>
+                <div className="text-center">
+                  <Button
+                    variant="link"
+                    onClick={() => setIsSigningUp(true)}
+                    className="text-blue-600"
+                  >
+                    Don't have an account? Sign Up
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-center">Create Account</h2>
+                <Input
+                  placeholder="Full Name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+                <Input
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+                <Input
+                  placeholder="Password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button className="w-full" onClick={handleSubmit}>Sign Up</Button>
+                <div className="text-center">
+                  <Button
+                    variant="link"
+                    onClick={() => setIsSigningUp(false)}
+                    className="text-blue-600"
+                  >
+                    Already have an account? Sign In
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className={clsx("relative w-[768px] min-h-[480px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700 hidden md:block", {
         "active": isSigningUp
       })}>
         {/* Sign In Form */}
@@ -109,16 +185,18 @@ export default function AuthPage() {
             ? "-translate-x-full rounded-[0_150px_100px_0]"
             : "translate-x-0 rounded-[150px_0_0_100px]"
         )}>
-          <div className="bg-gradient-to-r from-[#5c6bc0] to-[#2da0a8] text-white flex flex-col justify-center items-center h-full px-10 text-center transition-all duration-700">
-            <h2 className="text-3xl font-bold mb-2">
+          <div className="bg-cover bg-center text-white flex flex-col justify-end items-center h-full px-10 text-center transition-all duration-700 pb-16"
+            style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
+            {/* <h2 className="text-3xl font-bold mb-2">
               {isSigningUp ? "Welcome Back!" : "New here?"}
-            </h2>
-            <p className="text-sm mb-4">
+            </h2> */}
+            <p className="text-sm mb-4 animate-fade-slide">
               {isSigningUp ? "Already have an account? Sign in now." : "Create your EdClarity.ai account in seconds."}
             </p>
             <Button
               variant="outline"
-              className="text-white border-white bg-white/20 backdrop-blur-sm hover:bg-white/30 transition"
+              className="text-white border-white bg-white/20 backdrop-blur-sm hover:bg-white/30 transition animate-slide-up"
+              style={{ animationDelay: '0.2s' }}
               onClick={() => setIsSigningUp(!isSigningUp)}
             >
               {isSigningUp ? "Sign In" : "Sign Up"}
