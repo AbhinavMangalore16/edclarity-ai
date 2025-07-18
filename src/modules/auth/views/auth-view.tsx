@@ -25,7 +25,7 @@ const signUpZodSchema = z.object({
     password: z.string().min(6, { message: "Password is mandatory!" }),
     confirmPassword: z.string().min(6, {message: "Password required for confirmation"})
 }).refine((data)=> data.password === data.confirmPassword, {
-    message: "Given passwords do not match. Kindly try again!",
+    message: "Given passwords do not match.",
     path: ["confirmPassword"]
 })
 
@@ -43,11 +43,13 @@ export default function AuthView() {
         defaultValues: {
             name: "",
             email: "",
-            password: ""
+            password: "",
+            confirmPassword: ""
         }
     });
     const router = useRouter();
     const [error, setError] = useState<string | null>("")
+    const [errorS, setErrorS] = useState<string | null>("")
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
@@ -56,13 +58,20 @@ export default function AuthView() {
 
     const { data: session } = authClient.useSession();
 
-    const handleSubmit = () => {
-        authClient.signUp.email({ email, password, name }, {
-            onError: (c) => alert("Sign-up failed."),
+    const handleSignUp = (data: z.infer<typeof signUpZodSchema>) => {
+        setError(null)
+        setPending(true)
+        authClient.signUp.email({ name:data.name, email: data.email, password: data.password }, {
+            onError: ({ error }) => { 
+                setPending(false);
+                setErrorS(error.message); },
             onSuccess: () => {
-                alert("Check your inbox to verify!");
-                setEmail(""); setPassword(""); setName("");
+                setPending(false);
+                alert("Signed in successfully");
+                setEmail(""); setPassword("");
+                router.push("/")
             },
+
         });
     };
 
@@ -100,20 +109,20 @@ export default function AuthView() {
         <div>
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff] font-sans px-4">
                 {/* Mobile Layout */}
-                <div className="w-full max-w-lg md:hidden">
-                    <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <div className="w-full max-w-xl md:hidden">
+                    <div className="bg-white rounded-3xl shadow-xl overflow-auto">
                         {/* Top Banner */}
-                        <div className="h-48 bg-cover bg-center relative"
+                        <div className="h-56 bg-cover bg-center relative"
                             style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
-                            <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
+                            {/* <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                                 <h2 className="text-2xl font-bold text-white">
                                     {isSigningUp ? "Welcome Back!" : "New here?"}
                                 </h2>
-                            </div>
+                            </div> */}
                         </div>
 
                         {/* Form Container */}
-                        <div className="p-8">
+                        <div className="p-10">
                             {!isSigningUp ? (
                                 <Form {...signInForm}>
                                     <form className="flex flex-col items-center text-center w-full" onSubmit={signInForm.handleSubmit(handleSignIn)}>
@@ -164,20 +173,16 @@ export default function AuthView() {
                                         </div>
                                         <div className="flex flex-row gap-2 w-full mb-4">
                                             <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGoogleSignIn} */>
-                                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google" className="w-5 h-5" />
-                                                Google
+                                                <FcGoogle/>
                                             </Button>
                                             <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleMicrosoftSignIn} */>
-                                                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/microsoft/microsoft-original.svg" alt="Microsoft" className="w-5 h-5" />
-                                                Microsoft
+                                                <FaMicrosoft/>
                                             </Button>
                                             <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGithubSignIn} */>
-                                                <Github className="w-5 h-5" />
-                                                GitHub
+                                                <FaGithub/>
                                             </Button>
                                             <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleAppleSignIn} */>
-                                                <Apple className="w-5 h-5" />
-                                                Apple
+                                                <FaApple/>
                                             </Button>
                                         </div>
                                         <div className="text-center">
@@ -194,7 +199,7 @@ export default function AuthView() {
                                 </Form>
                             ) : (
                                 <Form {...signUpForm}>
-                                    <form className="flex flex-col items-center text-center w-full" onSubmit={signUpForm.handleSubmit(handleSubmit)}>
+                                    <form className="flex flex-col items-center text-center w-full" onSubmit={signUpForm.handleSubmit(handleSignUp)}>
                                         <h2 className="text-2xl font-bold text-center mb-4">Create Account</h2>
                                         <div className="flex flex-col gap-4 w-full mb-2">
                                             <FormField
@@ -250,8 +255,45 @@ export default function AuthView() {
                                                     </FormItem>
                                                 )}
                                             />
+                                            <FormField
+                                                control={signUpForm.control}
+                                                name="confirmPassword"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Confirm Password</FormLabel>
+                                                        <FormControl>
+                                                            <Input
+                                                                type="password"
+                                                                placeholder="********"
+                                                                className="w-full"
+                                                                {...field}
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
                                         </div>
-                                        <Button type="submit" className="w-full mb-4">Sign Up</Button>
+                                        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign Up</Button>
+                                        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after: items-center after: border-top mb-4">
+                                            <span className="bg-card text-muted-foreground relative z-10 px-2">
+                                                or continue with
+                                            </span>
+                                        </div>
+                                        <div className="flex flex-row gap-2 w-full mb-4">
+                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGoogleSignIn} */>
+                                                <FcGoogle/>
+                                            </Button>
+                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleMicrosoftSignIn} */>
+                                                <FaMicrosoft/>
+                                            </Button>
+                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGithubSignIn} */>
+                                                <FaGithub/>
+                                            </Button>
+                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleAppleSignIn} */>
+                                                <FaApple/>
+                                            </Button>
+                                        </div>
                                         <div className="text-center">
                                             <Button
                                                 variant="link"
@@ -270,11 +312,11 @@ export default function AuthView() {
                 </div>
 
                 {/* Desktop Layout */}
-                <div className={clsx("relative w-[768px] min-h-[480px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700 hidden md:block", {
+                <div className={clsx("relative w-[900px] min-h-[600px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700 hidden md:block", {
                     "active": isSigningUp
                 })}>
                     {/* Sign In Form */}
-                    <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700 ease-in-out", {
+                    <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
                         "left-0 opacity-100 z-20": !isSigningUp,
                         "-left-full opacity-0 z-10": isSigningUp,
                     })}>
@@ -367,36 +409,123 @@ export default function AuthView() {
                     </div>
 
                     {/* Sign Up Form */}
-                    <div className={clsx("absolute top-0 h-full w-1/2 p-10 transition-all duration-700 ease-in-out", {
+                    <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
                         "left-full w-1/2 opacity-0 z-10": !isSigningUp,
                         "left-0 w-1/2 opacity-100 z-30 translate-x-full": isSigningUp,
                     })}>
-                        <div className="flex flex-col items-center text-center">
-                            <h2 className="text-2xl font-bold">Create your Account</h2>
-                            <h2 className="text-muted-foreground text-balance mb-6">Join us and get started in seconds. It's free!</h2>
-                        </div>
-                        <div className="flex flex-col gap-4 w-full">
-                            <Input
-                                placeholder="Full Name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full"
-                            />
-                            <Input
-                                placeholder="Email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className="w-full"
-                            />
-                            <Input
-                                placeholder="Password"
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                className="w-full"
-                            />
-                        </div>
-                        <Button className="w-full mt-6" onClick={handleSubmit}>Sign Up</Button>
+                        
+                        <Form {...signUpForm}>
+                            <form className="p-6 w-full" onSubmit={signUpForm.handleSubmit(handleSignUp)}>
+                                <div className="flex flex-col items-center text-center w-full">
+                                    <div className="flex flex-col items-center text-center w-full">
+                                        <h2 className="text-2xl font-bold">Create your account</h2>
+                                        <h2 className="text-muted-foreground text-balance mb-6">Join us and get started. It's free!</h2>
+                                    </div>
+                                    <div className="grid gap-3 w-full">
+                                        <FormField
+                                            control={signUpForm.control}
+                                            name="name"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Full Name</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="name"
+                                                            placeholder="Your name here.."
+                                                            className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={signUpForm.control}
+                                            name="email"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Email</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="email"
+                                                            placeholder="lorem@ipsum.com"
+                                                            className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={signUpForm.control}
+                                            name="password"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="password"
+                                                            placeholder="********"
+                                                            className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                        <FormField
+                                            control={signUpForm.control}
+                                            name="confirmPassword"
+                                            render={({ field }) => (
+                                                <FormItem>
+                                                    <FormLabel>Confirm Password</FormLabel>
+                                                    <FormControl>
+                                                        <Input
+                                                            type="password"
+                                                            placeholder="********"
+                                                            className="w-full"
+                                                            {...field}
+                                                        />
+                                                    </FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                            )}
+                                        />
+                                    </div>
+                                    {!!errorS && (
+                                        <Alert className="bg-destructive/20 border-accent m-2">
+                                            <TriangleAlertIcon className="!text-destructive" />
+                                            {errorS}
+                                        </Alert>
+                                    )}
+                                    <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
+
+                                    {/* Divider */}
+                                    <div className="flex items-center my-3 w-full">
+                                        <div className="flex-grow h-px bg-muted-foreground/20" />
+                                        <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
+                                        <div className="flex-grow h-px bg-muted-foreground/20" />
+                                    </div>
+                                    <div className="grid grid-cols-4 gap-3">
+                                        <Button variant={"outline"} type="button" className="w-full">
+                                            <FcGoogle />
+                                        </Button>
+                                        <Button variant={"outline"} type="button" className="w-full">
+                                            <FaGithub />
+                                        </Button>
+                                        <Button variant={"outline"} type="button" className="w-full">
+                                            <FaMicrosoft />
+                                        </Button>
+                                        <Button variant={"outline"} type="button" className="w-full">
+                                            <FaApple />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </form>
+                        </Form>
                     </div>
 
                     {/* Toggle Panel */}
