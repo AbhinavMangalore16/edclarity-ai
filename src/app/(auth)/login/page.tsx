@@ -1,17 +1,18 @@
-"use client"
 import AuthView from "@/modules/auth/views/auth-view"
-import { useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
 import CircularProgress from '@mui/material/CircularProgress';
-import { useRouter } from "next/navigation";
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 
-const Page = () =>{
-    const router = useRouter();
-    const {data: session, isPending} = authClient.useSession();
-    if (isPending) return <div><CircularProgress/></div>;
-    if (session) {
-        router.replace("/");
-        return null; 
+const Page = async () =>{
+
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+    
+    if (!!session) {
+        redirect("/")
     }
     return <AuthView/>
 }

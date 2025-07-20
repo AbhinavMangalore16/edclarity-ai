@@ -12,7 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Alert } from "@/components/ui/alert";
 import { TriangleAlertIcon, Github, Apple, LucideIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
-import { FaApple, FaMicrosoft, FaGithub } from "react-icons/fa"
+import { FaApple, FaMicrosoft, FaGithub, FaLinkedin } from "react-icons/fa"
 import { useRouter } from "next/navigation";
 
 const signInZodSchema = z.object({
@@ -30,145 +30,145 @@ const signUpZodSchema = z.object({
 })
 
 type SocialHandlers = {
-  google?: () => void;
-  microsoft?: () => void;
-  github?: () => void;
-  apple?: () => void;
+    google?: () => void;
+    microsoft?: () => void;
+    github?: () => void;
+    apple?: () => void;
 };
 
 interface SignFormProps<T extends FieldValues> {
-  form: UseFormReturn<T>;
-  pending: boolean;
-  error: string | null;
-  onSubmit: (data: T) => void;
-  onSwitch: () => void;
-  socialDisabled?: boolean;
-  socialHandlers?: SocialHandlers;
-  isMobile: boolean;
+    form: UseFormReturn<T>;
+    pending: boolean;
+    error: string | null;
+    onSubmit: (data: T) => void;
+    onSwitch: () => void;
+    socialDisabled?: boolean;
+    socialHandlers?: SocialHandlers;
+    isMobile: boolean;
 }
 
 // Reusable SignInForm component
 function SignInForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, socialHandlers, isMobile }: SignFormProps<z.infer<typeof signInZodSchema>>) {
-  return (
-    <Form {...form}>
-      <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
-        <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Sign In</h2>
-        <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
-          <FormField control={form.control} name="email" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="password" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        </div>
-        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign In</Button>
-        <div className="relative text-center text-sm my-6">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-muted-foreground/30" />
-          </div>
-          <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
-        </div>
-        <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.github}><FaGithub /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button>
-        </div>
-        <div className="text-center">
-          <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Don't have an account? Sign Up</Button>
-        </div>
-        {!!error && (
-          <Alert className="bg-destructive/20 border-accent m-2">
-            <TriangleAlertIcon className="!text-destructive" />
-            {error}
-          </Alert>
-        )}
-      </form>
-    </Form>
-  );
+    return (
+        <Form {...form}>
+            <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
+                <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Sign In</h2>
+                <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="********" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+                <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign In</Button>
+                <div className="relative text-center text-sm my-6">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-muted-foreground/30" />
+                    </div>
+                    <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
+                </div>
+                <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
+                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
+                    {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button> */}
+                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={() => { authClient.signIn.social({ provider: "github", }) }}><FaGithub /></Button>
+                    {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button> */}
+                </div>
+                <div className="text-center">
+                    <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Don't have an account? Sign Up</Button>
+                </div>
+                {!!error && (
+                    <Alert className="bg-destructive/20 border-accent m-2">
+                        <TriangleAlertIcon className="!text-destructive" />
+                        {error}
+                    </Alert>
+                )}
+            </form>
+        </Form>
+    );
 }
 
 // Reusable SignUpForm component
 function SignUpForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, socialHandlers, isMobile }: SignFormProps<z.infer<typeof signUpZodSchema>>) {
-  return (
-    <Form {...form}>
-      <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
-        <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Create Account</h2>
-        <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
-          <FormField control={form.control} name="name" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Full Name</FormLabel>
-              <FormControl>
-                <Input type="text" placeholder="Full Name" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="email" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="password" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-          <FormField control={form.control} name="confirmPassword" render={({ field }) => (
-            <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="********" className="w-full" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )} />
-        </div>
-        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign Up</Button>
-        <div className="relative text-center text-sm my-6">
-          <div className="absolute inset-0 flex items-center" aria-hidden="true">
-            <div className="w-full border-t border-muted-foreground/30" />
-          </div>
-          <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
-        </div>
-        <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.github}><FaGithub /></Button>
-          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button>
-        </div>
-        <div className="text-center">
-          <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Already have an account? Sign In</Button>
-        </div>
-        {!!error && (
-          <Alert className="bg-destructive/20 border-accent m-2">
-            <TriangleAlertIcon className="!text-destructive" />
-            {error}
-          </Alert>
-        )}
-      </form>
-    </Form>
-  );
+    return (
+        <Form {...form}>
+            <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
+                <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Create Account</h2>
+                <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
+                    <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl>
+                                <Input type="text" placeholder="Full Name" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl>
+                                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={form.control} name="password" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="********" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Confirm Password</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="********" className="w-full" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                </div>
+                <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign Up</Button>
+                <div className="relative text-center text-sm my-6">
+                    <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                        <div className="w-full border-t border-muted-foreground/30" />
+                    </div>
+                    <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
+                </div>
+                <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
+                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
+                    {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button> */}
+                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.github}><FaGithub /></Button>
+                    {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button> */}
+                </div>
+                <div className="text-center">
+                    <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Already have an account? Sign In</Button>
+                </div>
+                {!!error && (
+                    <Alert className="bg-destructive/20 border-accent m-2">
+                        <TriangleAlertIcon className="!text-destructive" />
+                        {error}
+                    </Alert>
+                )}
+            </form>
+        </Form>
+    );
 }
 
 export default function AuthView() {
@@ -235,6 +235,22 @@ export default function AuthView() {
 
         });
     };
+    const handleSocial = (provider: 'github' | 'google') => {
+        setError(null)
+        setPending(true)
+        authClient.signIn.social({ provider: provider , callbackURL: "/" }, {
+            onError: ({ error }) => {
+                setPending(false);
+                setErrorS(error.message);
+            },
+            onSuccess: () => {
+                setPending(false);
+
+            },
+
+        });
+    };
+
 
     const handleSignOut = () => authClient.signOut();
 
@@ -270,7 +286,12 @@ export default function AuthView() {
                                     onSwitch={() => setIsSigningUp(true)}
                                     socialDisabled={pending}
                                     isMobile={true}
-                                    socialHandlers={undefined}
+                                    socialHandlers={{
+                                        google: () => authClient.signIn.social({ provider: "google" }),
+                                        github: () => authClient.signIn.social({ provider: "github" }),
+                                        microsoft: () => authClient.signIn.social({ provider: "microsoft" }),
+                                        apple: () => authClient.signIn.social({ provider: "apple" })
+                                    }}
                                 />
                             ) : (
                                 <SignUpForm
@@ -281,7 +302,12 @@ export default function AuthView() {
                                     onSwitch={() => setIsSigningUp(false)}
                                     socialDisabled={pending}
                                     isMobile={true}
-                                    socialHandlers={undefined}
+                                    socialHandlers={{
+                                        google: () => handleSocial('google'),
+                                        github: () => handleSocial('github'),
+                                        microsoft: () => authClient.signIn.social({ provider: "microsoft" }),
+                                        apple: () => authClient.signIn.social({ provider: "apple" })
+                                    }}
                                 />
                             )}
                         </div>
@@ -368,19 +394,22 @@ export default function AuthView() {
                                             <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
                                             <div className="flex-grow h-px bg-muted-foreground/20" />
                                         </div>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            <Button variant={"outline"} type="button" className="w-full">
-                                                <FcGoogle />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => handleSocial('google')}>
+                                                <FcGoogle /> Google
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full">
-                                                <FaGithub />
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", }) }}>
+                                                <FaGithub /> GitHub
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full">
-                                                <FaMicrosoft />
+                                            {/* <Button variant={"outline"} type="button" className="w-full">
+                                                <FaMicrosoft className="text-cyan-800" />
                                             </Button>
                                             <Button variant={"outline"} type="button" className="w-full">
                                                 <FaApple />
                                             </Button>
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaLinkedin className="text-blue-600"/>
+                                            </Button> */}
                                         </div>
                                     </div>
                                 </form>
@@ -489,19 +518,19 @@ export default function AuthView() {
                                             <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
                                             <div className="flex-grow h-px bg-muted-foreground/20" />
                                         </div>
-                                        <div className="grid grid-cols-4 gap-3">
-                                            <Button variant={"outline"} type="button" className="w-full">
-                                                <FcGoogle />
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => handleSocial('google')}>
+                                                <FcGoogle /> Google
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full">
-                                                <FaGithub />
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", }) }}>
+                                                <FaGithub /> Github
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full">
+                                            {/* <Button variant={"outline"} type="button" className="w-full" >
                                                 <FaMicrosoft />
                                             </Button>
                                             <Button variant={"outline"} type="button" className="w-full">
                                                 <FaApple />
-                                            </Button>
+                                            </Button> */}
                                         </div>
                                     </div>
                                 </form>
@@ -538,9 +567,9 @@ export default function AuthView() {
                         By continuing, you agree to our <a href="#"><u>Terms of Service</u></a> and <a href="#"><u>Privacy Policy</u></a>.
                     </div>
                 </div>
-                
+
             </div>
-            
+
             {/* <div className="flex justify-center mt-6 px-4">
                 <p className="text-muted-foreground text-center text-xs text-balance max-w-lg md:max-w-2xl leading-relaxed">
                     By continuing, you agree to our <a href="#" className="underline hover:text-primary">Terms of Service</a> and <a href="#" className="underline hover:text-primary">Privacy Policy</a>.
