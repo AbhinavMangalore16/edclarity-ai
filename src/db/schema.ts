@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, boolean, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, serial, varchar } from "drizzle-orm/pg-core";
 
 export const user = pgTable("user", {
   id: text('id').primaryKey(),
@@ -44,4 +44,10 @@ export const verification = pgTable("verification", {
   expiresAt: timestamp('expires_at').notNull(),
   createdAt: timestamp('created_at').$defaultFn(() => /* @__PURE__ */ new Date()),
   updatedAt: timestamp('updated_at').$defaultFn(() => /* @__PURE__ */ new Date())
+});
+
+export const notifyPeople = pgTable("notify_people", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow(),
 });

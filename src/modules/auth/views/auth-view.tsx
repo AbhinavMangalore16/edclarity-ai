@@ -7,7 +7,7 @@ import { authClient } from "@/lib/auth-client";
 import clsx from "clsx";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn, FieldValues } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert } from "@/components/ui/alert";
 import { TriangleAlertIcon, Github, Apple, LucideIcon } from "lucide-react";
@@ -20,14 +20,156 @@ const signInZodSchema = z.object({
     password: z.string().min(4, { message: "Kindly enter password correctly! (minimum length 6)" })
 })
 const signUpZodSchema = z.object({
-    name: z.string().max(255, { message: "Name is required" }),
+    name: z.string().min(1, { message: "Name is required" }),
     email: z.email(),
     password: z.string().min(6, { message: "Password is mandatory!" }),
-    confirmPassword: z.string().min(6, {message: "Password required for confirmation"})
-}).refine((data)=> data.password === data.confirmPassword, {
+    confirmPassword: z.string().min(6, { message: "Password required for confirmation" })
+}).refine((data) => data.password === data.confirmPassword, {
     message: "Given passwords do not match.",
     path: ["confirmPassword"]
 })
+
+type SocialHandlers = {
+  google?: () => void;
+  microsoft?: () => void;
+  github?: () => void;
+  apple?: () => void;
+};
+
+interface SignFormProps<T extends FieldValues> {
+  form: UseFormReturn<T>;
+  pending: boolean;
+  error: string | null;
+  onSubmit: (data: T) => void;
+  onSwitch: () => void;
+  socialDisabled?: boolean;
+  socialHandlers?: SocialHandlers;
+  isMobile: boolean;
+}
+
+// Reusable SignInForm component
+function SignInForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, socialHandlers, isMobile }: SignFormProps<z.infer<typeof signInZodSchema>>) {
+  return (
+    <Form {...form}>
+      <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
+        <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Sign In</h2>
+        <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="password" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="********" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign In</Button>
+        <div className="relative text-center text-sm my-6">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-muted-foreground/30" />
+          </div>
+          <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
+        </div>
+        <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.github}><FaGithub /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button>
+        </div>
+        <div className="text-center">
+          <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Don't have an account? Sign Up</Button>
+        </div>
+        {!!error && (
+          <Alert className="bg-destructive/20 border-accent m-2">
+            <TriangleAlertIcon className="!text-destructive" />
+            {error}
+          </Alert>
+        )}
+      </form>
+    </Form>
+  );
+}
+
+// Reusable SignUpForm component
+function SignUpForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, socialHandlers, isMobile }: SignFormProps<z.infer<typeof signUpZodSchema>>) {
+  return (
+    <Form {...form}>
+      <form className={isMobile ? "flex flex-col items-center text-center w-full" : "p-6"} onSubmit={form.handleSubmit(onSubmit)}>
+        <h2 className={isMobile ? "text-2xl font-bold text-center mb-4" : "text-2xl font-bold mb-6 text-center"}>Create Account</h2>
+        <div className={isMobile ? "flex flex-col gap-4 w-full mb-2" : "flex flex-col gap-4 w-full mb-6"}>
+          <FormField control={form.control} name="name" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Full Name</FormLabel>
+              <FormControl>
+                <Input type="text" placeholder="Full Name" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="email" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Input type="email" placeholder="lorem@ipsum.com" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="password" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="********" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+          <FormField control={form.control} name="confirmPassword" render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input type="password" placeholder="********" className="w-full" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )} />
+        </div>
+        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign Up</Button>
+        <div className="relative text-center text-sm my-6">
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-muted-foreground/30" />
+          </div>
+          <span className="relative z-10 bg-white dark:bg-background px-2 text-muted-foreground">or continue with</span>
+        </div>
+        <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.github}><FaGithub /></Button>
+          <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button>
+        </div>
+        <div className="text-center">
+          <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Already have an account? Sign In</Button>
+        </div>
+        {!!error && (
+          <Alert className="bg-destructive/20 border-accent m-2">
+            <TriangleAlertIcon className="!text-destructive" />
+            {error}
+          </Alert>
+        )}
+      </form>
+    </Form>
+  );
+}
 
 export default function AuthView() {
 
@@ -41,8 +183,8 @@ export default function AuthView() {
     const signUpForm = useForm<z.infer<typeof signUpZodSchema>>({
         resolver: zodResolver(signUpZodSchema),
         defaultValues: {
-            name: "",
-            email: "",
+            name: " ",
+            email: " ",
             password: "",
             confirmPassword: ""
         }
@@ -61,10 +203,11 @@ export default function AuthView() {
     const handleSignUp = (data: z.infer<typeof signUpZodSchema>) => {
         setError(null)
         setPending(true)
-        authClient.signUp.email({ name:data.name, email: data.email, password: data.password }, {
-            onError: ({ error }) => { 
+        authClient.signUp.email({ name: data.name, email: data.email, password: data.password }, {
+            onError: ({ error }) => {
                 setPending(false);
-                setErrorS(error.message); },
+                setErrorS(error.message);
+            },
             onSuccess: () => {
                 setPending(false);
                 alert("Signed in successfully");
@@ -79,9 +222,10 @@ export default function AuthView() {
         setError(null)
         setPending(true)
         authClient.signIn.email({ email: data.email, password: data.password }, {
-            onError: ({ error }) => { 
+            onError: ({ error }) => {
                 setPending(false);
-                setError(error.message); },
+                setError(error.message);
+            },
             onSuccess: () => {
                 setPending(false);
                 alert("Signed in successfully");
@@ -110,24 +254,69 @@ export default function AuthView() {
             <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-[#e2e2e2] to-[#c9d6ff] font-sans px-4">
                 {/* Mobile Layout */}
                 <div className="w-full max-w-xl md:hidden">
-                    <div className="bg-white rounded-3xl shadow-xl overflow-auto">
+                    <div className="bg-white rounded-3xl shadow-xl overflow-auto max-h-[90vh]">
                         {/* Top Banner */}
                         <div className="h-56 bg-cover bg-center relative"
                             style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
-                            {/* <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                                <h2 className="text-2xl font-bold text-white">
-                                    {isSigningUp ? "Welcome Back!" : "New here?"}
-                                </h2>
-                            </div> */}
                         </div>
-
                         {/* Form Container */}
                         <div className="p-10">
                             {!isSigningUp ? (
-                                <Form {...signInForm}>
-                                    <form className="flex flex-col items-center text-center w-full" onSubmit={signInForm.handleSubmit(handleSignIn)}>
-                                        <h2 className="text-2xl font-bold text-center mb-4">Sign In</h2>
-                                        <div className="flex flex-col gap-4 w-full mb-2">
+                                <SignInForm
+                                    form={signInForm}
+                                    pending={pending}
+                                    error={error}
+                                    onSubmit={handleSignIn}
+                                    onSwitch={() => setIsSigningUp(true)}
+                                    socialDisabled={pending}
+                                    isMobile={true}
+                                    socialHandlers={undefined}
+                                />
+                            ) : (
+                                <SignUpForm
+                                    form={signUpForm}
+                                    pending={pending}
+                                    error={errorS}
+                                    onSubmit={handleSignUp}
+                                    onSwitch={() => setIsSigningUp(false)}
+                                    socialDisabled={pending}
+                                    isMobile={true}
+                                    socialHandlers={undefined}
+                                />
+                            )}
+                        </div>
+                    </div>
+                    <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance mt-4">
+                        By continuing, you agree to our <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>.
+                    </div>
+                </div>
+                <div className="hidden md:flex flex-col items-center">
+                    {/* Desktop Layout */}
+                    <div className={clsx("relative w-[900px] min-h-[600px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700 hidden md:block", {
+                        "active": isSigningUp
+                    })}>
+                        {/* Sign In Form */}
+                        <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
+                            "left-0 opacity-100 z-20": !isSigningUp,
+                            "-left-full opacity-0 z-10": isSigningUp,
+                        })}>
+
+                            {/* 
+          <Input
+            placeholder="Password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="mb-6"
+          /> */}
+                            <Form {...signInForm}>
+                                <form className="p-6 w-full" onSubmit={signInForm.handleSubmit(handleSignIn)}>
+                                    <div className="flex flex-col items-center text-center w-full">
+                                        <div className="flex flex-col items-center text-center w-full">
+                                            <h2 className="text-2xl font-bold">Welcome Back!</h2>
+                                            <h2 className="text-muted-foreground text-balance mb-6">Please login to your account</h2>
+                                        </div>
+                                        <div className="grid gap-3 w-full">
                                             <FormField
                                                 control={signInForm.control}
                                                 name="email"
@@ -165,43 +354,54 @@ export default function AuthView() {
                                                 )}
                                             />
                                         </div>
-                                        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign In</Button>
-                                        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after: items-center after: border-top mb-4">
-                                            <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                                or continue with
-                                            </span>
+                                        {!!error && (
+                                            <Alert className="bg-destructive/20 border-accent m-2">
+                                                <TriangleAlertIcon className="!text-destructive" />
+                                                {error}
+                                            </Alert>
+                                        )}
+                                        <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
+
+                                        {/* Divider */}
+                                        <div className="flex items-center my-3 w-full">
+                                            <div className="flex-grow h-px bg-muted-foreground/20" />
+                                            <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
+                                            <div className="flex-grow h-px bg-muted-foreground/20" />
                                         </div>
-                                        <div className="flex flex-row gap-2 w-full mb-4">
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGoogleSignIn} */>
-                                                <FcGoogle/>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FcGoogle />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleMicrosoftSignIn} */>
-                                                <FaMicrosoft/>
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaGithub />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGithubSignIn} */>
-                                                <FaGithub/>
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaMicrosoft />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleAppleSignIn} */>
-                                                <FaApple/>
-                                            </Button>
-                                        </div>
-                                        <div className="text-center">
-                                            <Button
-                                                variant="link"
-                                                onClick={() => setIsSigningUp(true)}
-                                                className="text-blue-600"
-                                                type="button"
-                                            >
-                                                Don't have an account? Sign Up
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaApple />
                                             </Button>
                                         </div>
-                                    </form>
-                                </Form>
-                            ) : (
-                                <Form {...signUpForm}>
-                                    <form className="flex flex-col items-center text-center w-full" onSubmit={signUpForm.handleSubmit(handleSignUp)}>
-                                        <h2 className="text-2xl font-bold text-center mb-4">Create Account</h2>
-                                        <div className="flex flex-col gap-4 w-full mb-2">
+                                    </div>
+                                </form>
+                            </Form>
+
+                        </div>
+
+                        {/* Sign Up Form */}
+                        <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
+                            "left-full w-1/2 opacity-0 z-10": !isSigningUp,
+                            "left-0 w-1/2 opacity-100 z-30 translate-x-full": isSigningUp,
+                        })}>
+
+                            <Form {...signUpForm}>
+                                <form className="p-6 w-full" onSubmit={signUpForm.handleSubmit(handleSignUp)}>
+                                    <div className="flex flex-col items-center text-center w-full">
+                                        <div className="flex flex-col items-center text-center w-full">
+                                            <h2 className="text-2xl font-bold">Create your account</h2>
+                                            <h2 className="text-muted-foreground text-balance mb-6">Join us and get started. It's free!</h2>
+                                        </div>
+                                        <div className="grid gap-3 w-full">
                                             <FormField
                                                 control={signUpForm.control}
                                                 name="name"
@@ -210,7 +410,8 @@ export default function AuthView() {
                                                         <FormLabel>Full Name</FormLabel>
                                                         <FormControl>
                                                             <Input
-                                                                placeholder="Full Name"
+                                                                type="name"
+                                                                placeholder="Your name here.."
                                                                 className="w-full"
                                                                 {...field}
                                                             />
@@ -274,290 +475,75 @@ export default function AuthView() {
                                                 )}
                                             />
                                         </div>
-                                        <Button disabled={pending} type="submit" className="w-full px-4 mb-4">Sign Up</Button>
-                                        <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after: items-center after: border-top mb-4">
-                                            <span className="bg-card text-muted-foreground relative z-10 px-2">
-                                                or continue with
-                                            </span>
+                                        {!!errorS && (
+                                            <Alert className="bg-destructive/20 border-accent m-2">
+                                                <TriangleAlertIcon className="!text-destructive" />
+                                                {errorS}
+                                            </Alert>
+                                        )}
+                                        <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
+
+                                        {/* Divider */}
+                                        <div className="flex items-center my-3 w-full">
+                                            <div className="flex-grow h-px bg-muted-foreground/20" />
+                                            <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
+                                            <div className="flex-grow h-px bg-muted-foreground/20" />
                                         </div>
-                                        <div className="flex flex-row gap-2 w-full mb-4">
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGoogleSignIn} */>
-                                                <FcGoogle/>
+                                        <div className="grid grid-cols-4 gap-3">
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FcGoogle />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleMicrosoftSignIn} */>
-                                                <FaMicrosoft/>
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaGithub />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleGithubSignIn} */>
-                                                <FaGithub/>
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaMicrosoft />
                                             </Button>
-                                            <Button disabled={pending} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" /* onClick={handleAppleSignIn} */>
-                                                <FaApple/>
-                                            </Button>
-                                        </div>
-                                        <div className="text-center">
-                                            <Button
-                                                variant="link"
-                                                onClick={() => setIsSigningUp(false)}
-                                                className="text-blue-600"
-                                                type="button"
-                                            >
-                                                Already have an account? Sign In
+                                            <Button variant={"outline"} type="button" className="w-full">
+                                                <FaApple />
                                             </Button>
                                         </div>
-                                    </form>
-                                </Form>
-                            )}
+                                    </div>
+                                </form>
+                            </Form>
                         </div>
-                    </div>
-                </div>
 
-                {/* Desktop Layout */}
-                <div className={clsx("relative w-[900px] min-h-[600px] bg-white rounded-[30px] shadow-xl overflow-hidden transition-all duration-700 hidden md:block", {
-                    "active": isSigningUp
-                })}>
-                    {/* Sign In Form */}
-                    <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
-                        "left-0 opacity-100 z-20": !isSigningUp,
-                        "-left-full opacity-0 z-10": isSigningUp,
-                    })}>
-
-                        {/* 
-          <Input
-            placeholder="Password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mb-6"
-          /> */}
-                        <Form {...signInForm}>
-                            <form className="p-6 w-full" onSubmit={signInForm.handleSubmit(handleSignIn)}>
-                                <div className="flex flex-col items-center text-center w-full">
-                                    <div className="flex flex-col items-center text-center w-full">
-                                        <h2 className="text-2xl font-bold">Welcome Back!</h2>
-                                        <h2 className="text-muted-foreground text-balance mb-6">Please login to your account</h2>
-                                    </div>
-                                    <div className="grid gap-3 w-full">
-                                        <FormField
-                                            control={signInForm.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="email"
-                                                            placeholder="lorem@ipsum.com"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={signInForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Password</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="********"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    {!!error && (
-                                        <Alert className="bg-destructive/20 border-accent m-2">
-                                            <TriangleAlertIcon className="!text-destructive" />
-                                            {error}
-                                        </Alert>
-                                    )}
-                                    <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
-
-                                    {/* Divider */}
-                                    <div className="flex items-center my-3 w-full">
-                                        <div className="flex-grow h-px bg-muted-foreground/20" />
-                                        <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
-                                        <div className="flex-grow h-px bg-muted-foreground/20" />
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-3">
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FcGoogle />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaGithub />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaMicrosoft />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaApple />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </form>
-                        </Form>
-
-                    </div>
-
-                    {/* Sign Up Form */}
-                    <div className={clsx("absolute top-0 h-full w-1/2 p-12 transition-all duration-700 ease-in-out", {
-                        "left-full w-1/2 opacity-0 z-10": !isSigningUp,
-                        "left-0 w-1/2 opacity-100 z-30 translate-x-full": isSigningUp,
-                    })}>
-                        
-                        <Form {...signUpForm}>
-                            <form className="p-6 w-full" onSubmit={signUpForm.handleSubmit(handleSignUp)}>
-                                <div className="flex flex-col items-center text-center w-full">
-                                    <div className="flex flex-col items-center text-center w-full">
-                                        <h2 className="text-2xl font-bold">Create your account</h2>
-                                        <h2 className="text-muted-foreground text-balance mb-6">Join us and get started. It's free!</h2>
-                                    </div>
-                                    <div className="grid gap-3 w-full">
-                                        <FormField
-                                            control={signUpForm.control}
-                                            name="name"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Full Name</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="name"
-                                                            placeholder="Your name here.."
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={signUpForm.control}
-                                            name="email"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Email</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="email"
-                                                            placeholder="lorem@ipsum.com"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={signUpForm.control}
-                                            name="password"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Password</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="********"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                        <FormField
-                                            control={signUpForm.control}
-                                            name="confirmPassword"
-                                            render={({ field }) => (
-                                                <FormItem>
-                                                    <FormLabel>Confirm Password</FormLabel>
-                                                    <FormControl>
-                                                        <Input
-                                                            type="password"
-                                                            placeholder="********"
-                                                            className="w-full"
-                                                            {...field}
-                                                        />
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )}
-                                        />
-                                    </div>
-                                    {!!errorS && (
-                                        <Alert className="bg-destructive/20 border-accent m-2">
-                                            <TriangleAlertIcon className="!text-destructive" />
-                                            {errorS}
-                                        </Alert>
-                                    )}
-                                    <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
-
-                                    {/* Divider */}
-                                    <div className="flex items-center my-3 w-full">
-                                        <div className="flex-grow h-px bg-muted-foreground/20" />
-                                        <span className="mx-4 text-muted-foreground text-xs">Or continue with</span>
-                                        <div className="flex-grow h-px bg-muted-foreground/20" />
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-3">
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FcGoogle />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaGithub />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaMicrosoft />
-                                        </Button>
-                                        <Button variant={"outline"} type="button" className="w-full">
-                                            <FaApple />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </form>
-                        </Form>
-                    </div>
-
-                    {/* Toggle Panel */}
-                    <div className={clsx(
-                        "absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 ease-in-out z-30",
-                        isSigningUp
-                            ? "-translate-x-full rounded-[0_150px_100px_0]"
-                            : "translate-x-0 rounded-[150px_0_0_100px]"
-                    )}>
-                        <div className="bg-cover bg-center text-white flex flex-col justify-end items-center h-full px-10 text-center transition-all duration-700 pb-16"
-                            style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
-                            {/* <h2 className="text-3xl font-bold mb-2">
+                        {/* Toggle Panel */}
+                        <div className={clsx(
+                            "absolute top-0 left-1/2 w-1/2 h-full overflow-hidden transition-all duration-700 ease-in-out z-30",
+                            isSigningUp
+                                ? "-translate-x-full rounded-[0_150px_100px_0]"
+                                : "translate-x-0 rounded-[150px_0_0_100px]"
+                        )}>
+                            <div className="bg-cover bg-center text-white flex flex-col justify-end items-center h-full px-10 text-center transition-all duration-700 pb-16"
+                                style={{ backgroundImage: "url('/EdClarity-ai.png')" }}>
+                                {/* <h2 className="text-3xl font-bold mb-2">
               {isSigningUp ? "Welcome Back!" : "New here?"}
             </h2> */}
-                            <p className="text-sm mb-4 animate-fade-slide">
-                                {isSigningUp ? "Already have an account? Sign in now." : "Create your EdClarity.ai account in seconds."}
-                            </p>
-                            <Button
-                                variant="outline"
-                                className="text-white border-white bg-white/20 backdrop-blur-sm hover:bg-white/30 transition animate-slide-up"
-                                style={{ animationDelay: '0.2s' }}
-                                onClick={() => setIsSigningUp(!isSigningUp)}
-                            >
-                                {isSigningUp ? "Sign In" : "Sign Up"}
-                            </Button>
+                                <p className="text-sm mb-4 animate-fade-slide">
+                                    {isSigningUp ? "Already have an account? Sign in now." : "Create your EdClarity.ai account in seconds."}
+                                </p>
+                                <Button
+                                    variant="outline"
+                                    className="text-white border-white bg-white/20 backdrop-blur-sm hover:bg-white/30 transition animate-slide-up"
+                                    style={{ animationDelay: '0.2s' }}
+                                    onClick={() => setIsSigningUp(!isSigningUp)}
+                                >
+                                    {isSigningUp ? "Sign In" : "Sign Up"}
+                                </Button>
+                            </div>
                         </div>
                     </div>
+                    <div className="text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance mt-8">
+                        By continuing, you agree to our <a href="#"><u>Terms of Service</u></a> and <a href="#"><u>Privacy Policy</u></a>.
+                    </div>
                 </div>
+                
             </div>
+            
             {/* <div className="flex justify-center mt-6 px-4">
                 <p className="text-muted-foreground text-center text-xs text-balance max-w-lg md:max-w-2xl leading-relaxed">
-                    By clicking continue, you agree to our <a href="#" className="underline hover:text-primary">Terms of Service</a> and <a href="#" className="underline hover:text-primary">Privacy Policy</a>.
+                    By continuing, you agree to our <a href="#" className="underline hover:text-primary">Terms of Service</a> and <a href="#" className="underline hover:text-primary">Privacy Policy</a>.
                 </p>
             </div> */}
         </div>
