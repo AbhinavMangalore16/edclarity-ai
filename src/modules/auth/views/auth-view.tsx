@@ -87,7 +87,7 @@ function SignInForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, 
                     {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button> */}
                 </div>
                 <div className="text-center">
-                    <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Don't have an account? Sign Up</Button>
+                    <Button variant="link" onClick={onSwitch} className="text-blue-600" type="button">Don&apos;t have an account? Sign Up</Button>
                 </div>
                 {!!error && (
                     <Alert className="bg-destructive/20 border-accent m-2">
@@ -428,7 +428,7 @@ export default function AuthView() {
                                     <div className="flex flex-col items-center text-center w-full">
                                         <div className="flex flex-col items-center text-center w-full">
                                             <h2 className="text-2xl font-bold">Create your account</h2>
-                                            <h2 className="text-muted-foreground text-balance mb-6">Join us and get started. It's free!</h2>
+                                            <h2 className="text-muted-foreground text-balance mb-6">Join us and get started. It&apos;s free!</h2>
                                         </div>
                                         <div className="grid gap-3 w-full">
                                             <FormField
@@ -510,7 +510,7 @@ export default function AuthView() {
                                                 {errorS}
                                             </Alert>
                                         )}
-                                        <Button type="submit" className="w-full px-4 mt-2" >Sign In</Button>
+                                        <Button type="submit" className="w-full px-4 mt-2" >Sign Up</Button>
 
                                         {/* Divider */}
                                         <div className="flex items-center my-3 w-full">

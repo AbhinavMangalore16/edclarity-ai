@@ -97,7 +97,7 @@ export default function HomePageView() {
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground max-w-xl mb-8">
-                We're building something powerful to revolutionize learning clarity. Stay tuned — we’ll be live before you know it.
+                We&apos;re building something powerful to revolutionize learning clarity. Stay tuned — we’ll be live before you know it.
             </p>
 
             {!showInput && !submitted && (
@@ -125,7 +125,7 @@ export default function HomePageView() {
 
             {submitted && (
                 <p className="mt-4 text-green-600 font-medium">
-                    🎉 You're on the list! We'll keep you posted.
+                    🎉 You&apos;re on the list! We&apos;ll keep you posted.
                 </p>
             )}
 
