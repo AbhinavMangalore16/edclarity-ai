@@ -49,7 +49,7 @@ An AI-powered educational platform that revolutionizes learning through intellig
 - **Custom AI Agents** - Specialized AI tutors for different subjects
 - **Real-time Doubt Solving** - Instant AI assistance during study sessions
 - **Intelligent Q&A** - Context-aware AI that understands learning progress
-- **OpenAI Integration** - Advanced language models for educational content
+- **Gemma and Gemini Pro Integration** - Advanced language models for educational content and larger inclusivity
 
 ### 📞 Real-time Communication
 - **Stream Video SDK** - High-quality video calls for tutoring sessions
