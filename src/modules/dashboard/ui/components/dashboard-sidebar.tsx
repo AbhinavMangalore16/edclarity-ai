@@ -1,12 +1,13 @@
 "use client";
 
 import { Separator } from "@/components/ui/separator";
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { BotMessageSquareIcon, DiamondPlusIcon, HeadsetIcon, MegaphoneIcon, VideoIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserDetailsCard } from "./user-details-card";
 
 const top = [
 
@@ -110,6 +111,9 @@ export const DashboardSidebar = () => {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <UserDetailsCard/>
+            </SidebarFooter>
         </Sidebar>
 
     )

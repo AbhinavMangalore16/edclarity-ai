@@ -15,11 +15,8 @@ export default function HomePageView() {
     const [showInput, setShowInput] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [message, setMessage] = useState("");
-    const router = useRouter();
+
     const { data: session, isPending } = authClient.useSession();
-    const handleSignOut = async () => {
-        await authClient.signOut();
-    };
 
     useEffect(() => {
         let i = 0;
@@ -76,19 +73,7 @@ export default function HomePageView() {
         <main className="relative flex flex-col items-center justify-center min-h-screen p-6 bg-gradient-to-br from-[#c9d6ff] to-[#e2e2e2] text-center">
 
             {/* Top Navigation */}
-            <div className="absolute top-4 left-6 right-6 flex justify-between items-center">
-                <span className="text-sm text-green-800 font-medium">
-                    Logged in as {session?.user.name}
-                </span>
-                <Button
-                    className="px-4 py-2 text-sm font-medium shadow-md hover:scale-105 transition"
-                    onClick={() => {
-                        authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/login") } })
-                    }}
-                >
-                    Sign Out
-                </Button>
-            </div>
+
 
             {/* Rest of the content */}
             <h1 className="text-5xl md:text-6xl font-extrabold mb-6 text-gray-900 mt-20">
