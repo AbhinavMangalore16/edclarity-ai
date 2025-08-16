@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, forwardRef } from "react";
+import { useState, forwardRef, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -47,28 +47,54 @@ interface SignFormProps<T extends FieldValues> {
     socialHandlers?: SocialHandlers;
     isMobile: boolean;
 }
-export const PasswordInput = forwardRef<HTMLInputElement, React.ComponentProps<typeof Input>>(function PasswordInput({className, ...props}, ref) {
-  const [show, setShow] = useState(false);
-  return (
-    <div className="relative w-full">
-      <Input
-        {...props}
-        ref = {ref}
-        type={show ? "text" : "password"}
-        className={clsx("pr-10", className)}
-      />
-      <button
-        type="button"
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-        onClick={() => setShow(!show)}
-        onMouseDown={(e) => e.preventDefault()}
-        aria-label={show ? "Hide password" : "Show password"}
-        aria-pressed={show}
-      >
-        {show ? <EyeOff size={18} /> : <Eye size={18} />}
-      </button>
-    </div>
-  );
+export const PasswordInput = forwardRef<
+    HTMLInputElement,
+    React.ComponentProps<typeof Input>
+>(function PasswordInput({ className, ...props }, ref) {
+    const [show, setShow] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
+    function setRefs(el: HTMLInputElement) {
+        inputRef.current = el;
+        if (typeof ref === "function") {
+            ref(el);
+        } else if (ref) {
+            (ref as React.MutableRefObject<HTMLInputElement | null>).current = el;
+        }
+    }
+    function togglePassword() {
+        const input = inputRef.current;
+        if (!input) return;
+
+        const { selectionStart, selectionEnd } = input;
+
+        setShow((prev) => !prev);
+        requestAnimationFrame(() => {
+            if (input.selectionStart !== null && selectionStart !== null) {
+                input.setSelectionRange(selectionStart, selectionEnd!);
+            }
+        });
+    }
+
+    return (
+        <div className="relative w-full">
+            <Input
+                {...props}
+                ref={setRefs}
+                type={show ? "text" : "password"}
+                className={clsx("pr-10", className)}
+            />
+            <button
+                type="button"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={togglePassword}
+                aria-label={show ? "Hide password" : "Show password"}
+                aria-pressed={show}
+            >
+                {show ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+        </div>
+    );
 });
 
 // Reusable SignInForm component
@@ -262,7 +288,7 @@ export default function AuthView() {
     const handleSocial = (provider: 'github' | 'google') => {
         setError(null)
         setPending(true)
-        authClient.signIn.social({ provider: provider , callbackURL: "/" }, {
+        authClient.signIn.social({ provider: provider, callbackURL: "/" }, {
             onError: ({ error }) => {
                 setPending(false);
                 setErrorS(error.message);
