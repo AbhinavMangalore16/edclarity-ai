@@ -10,7 +10,7 @@ export const DBNavbar = () => {
     const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
     useEffect(() => {
         const pressDown = (e: KeyboardEvent) => {
-            if ((e.key === "k" || e.key === "K")&&(e.metaKey || e.ctrlKey)) {
+            if ((e.key === "k" || e.key === "K") && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault();
                 setCommandPaletteOpen((open) => !open);
             }

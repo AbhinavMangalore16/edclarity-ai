@@ -1,6 +1,4 @@
-import { CommandDialog, CommandItem, CommandList } from "@/components/ui/command";
-import { CommandInput } from "cmdk";
-import { Search } from "lucide-react";
+import { CommandDialog, CommandItem, CommandList, CommandInput, CommandEmpty } from "@/components/ui/command";
 import { Dispatch, SetStateAction } from "react";
 
 interface DBCommandPaletteProps {

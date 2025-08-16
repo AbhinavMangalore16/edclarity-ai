@@ -5,7 +5,7 @@ import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, D
 import { DropdownMenu, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { authClient } from "@/lib/auth-client";
-import { DropdownMenuContent } from "@radix-ui/react-dropdown-menu";
+import { DropdownMenuContent } from "@/components/ui/dropdown-menu";
 import { ChevronRightIcon, CreditCardIcon, LogOutIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -73,7 +73,7 @@ export const UserDetailsCard = () => {
         <DropdownMenu>
             <span className="text-xs text-green-700">Logged in as:</span>
             <DropdownMenuTrigger className="rounded-lg border border-border/20 p-4 w-full flex items-center
-      justify-between bg-accent/10 hover:bg-accent/20 transition-colors overflow-hidden">
+      justify-between gap-x-1 bg-accent/10 hover:bg-accent/20 transition-colors overflow-hidden ">
                 {user.user.image ? (
                     <Avatar className="w-10 h-10 ring-1 ring-white/10 shadow-sm">
                         <AvatarImage src={user.user.image} alt={user.user.name || "User"} />

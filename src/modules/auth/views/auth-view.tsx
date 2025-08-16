@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
@@ -47,25 +47,29 @@ interface SignFormProps<T extends FieldValues> {
     socialHandlers?: SocialHandlers;
     isMobile: boolean;
 }
-export function PasswordInput({ ...props }) {
+export const PasswordInput = forwardRef<HTMLInputElement, React.ComponentProps<typeof Input>>(function PasswordInput({className, ...props}, ref) {
   const [show, setShow] = useState(false);
   return (
     <div className="relative w-full">
       <Input
-        type={show ? "text" : "password"}
         {...props}
+        ref = {ref}
+        type={show ? "text" : "password"}
+        className={clsx("pr-10", className)}
       />
       <button
         type="button"
         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         onClick={() => setShow(!show)}
-        tabIndex={-1} // avoids stealing focus
+        onMouseDown={(e) => e.preventDefault()}
+        aria-label={show ? "Hide password" : "Show password"}
+        aria-pressed={show}
       >
         {show ? <EyeOff size={18} /> : <Eye size={18} />}
       </button>
     </div>
   );
-}
+});
 
 // Reusable SignInForm component
 function SignInForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, socialHandlers, isMobile }: SignFormProps<z.infer<typeof signInZodSchema>>) {
