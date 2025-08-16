@@ -14,6 +14,7 @@ import { TriangleAlertIcon, Github, Apple, LucideIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
 import { FaApple, FaMicrosoft, FaGithub, FaLinkedin } from "react-icons/fa"
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 
 const signInZodSchema = z.object({
     email: z.email(),
@@ -45,6 +46,25 @@ interface SignFormProps<T extends FieldValues> {
     socialDisabled?: boolean;
     socialHandlers?: SocialHandlers;
     isMobile: boolean;
+}
+export function PasswordInput({ ...props }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative w-full">
+      <Input
+        type={show ? "text" : "password"}
+        {...props}
+      />
+      <button
+        type="button"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        onClick={() => setShow(!show)}
+        tabIndex={-1} // avoids stealing focus
+      >
+        {show ? <EyeOff size={18} /> : <Eye size={18} />}
+      </button>
+    </div>
+  );
 }
 
 // Reusable SignInForm component
@@ -129,7 +149,7 @@ function SignUpForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, 
                         <FormItem>
                             <FormLabel>Password</FormLabel>
                             <FormControl>
-                                <Input type="password" placeholder="********" className="w-full" {...field} />
+                                <PasswordInput placeholder="********" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -138,7 +158,7 @@ function SignUpForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, 
                         <FormItem>
                             <FormLabel>Confirm Password</FormLabel>
                             <FormControl>
-                                <Input type="password" placeholder="********" className="w-full" {...field} />
+                                <PasswordInput placeholder="********" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -368,12 +388,7 @@ export default function AuthView() {
                                                     <FormItem>
                                                         <FormLabel>Password</FormLabel>
                                                         <FormControl>
-                                                            <Input
-                                                                type="password"
-                                                                placeholder="********"
-                                                                className="w-full"
-                                                                {...field}
-                                                            />
+                                                            <PasswordInput placeholder="********" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -474,12 +489,7 @@ export default function AuthView() {
                                                     <FormItem>
                                                         <FormLabel>Password</FormLabel>
                                                         <FormControl>
-                                                            <Input
-                                                                type="password"
-                                                                placeholder="********"
-                                                                className="w-full"
-                                                                {...field}
-                                                            />
+                                                            <PasswordInput placeholder="********" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
@@ -492,12 +502,7 @@ export default function AuthView() {
                                                     <FormItem>
                                                         <FormLabel>Confirm Password</FormLabel>
                                                         <FormControl>
-                                                            <Input
-                                                                type="password"
-                                                                placeholder="********"
-                                                                className="w-full"
-                                                                {...field}
-                                                            />
+                                                            <PasswordInput placeholder="********" {...field} />
                                                         </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
