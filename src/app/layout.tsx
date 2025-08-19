@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Sora } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next"
+import { TRPCReactProvider } from "@/trpc/client";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -29,13 +30,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} antialiased`}
-      >
-        {children}
-        <Analytics/>
-      </body>
-    </html>
+    <TRPCReactProvider>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} antialiased`}
+        >
+          {children}
+          <Analytics />
+        </body>
+      </html>
+    </TRPCReactProvider>
   );
 }
