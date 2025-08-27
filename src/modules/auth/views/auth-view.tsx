@@ -17,12 +17,12 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
 const signInZodSchema = z.object({
-    email: z.email(),
+    email: z.string().email(),
     password: z.string().min(4, { message: "Kindly enter password correctly! (minimum length 6)" })
 })
 const signUpZodSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
-    email: z.email(),
+    email: z.string().email(),
     password: z.string().min(6, { message: "Password is mandatory!" }),
     confirmPassword: z.string().min(6, { message: "Password required for confirmation" })
 }).refine((data) => data.password === data.confirmPassword, {

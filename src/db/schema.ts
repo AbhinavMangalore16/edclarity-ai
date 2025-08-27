@@ -1,4 +1,5 @@
 import { pgTable, text, timestamp, boolean, integer, serial, varchar } from "drizzle-orm/pg-core";
+import { nanoid } from 'nanoid'
 
 export const user = pgTable("user", {
   id: text('id').primaryKey(),
@@ -51,3 +52,13 @@ export const notifyPeople = pgTable("notify_people", {
   email: varchar("email", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+export const agents = pgTable("agents", {
+  id: text("id").primaryKey().$defaultFn(()=> nanoid()),
+  name: text("name").notNull(),
+  instructions: text("instructions").notNull(),
+  metadata: text("metadata"),
+  userId: text("user_id").notNull().references(()=>user.id, {onDelete: "cascade"}),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
