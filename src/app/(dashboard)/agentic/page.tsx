@@ -14,7 +14,6 @@ const Page = async () => {
         <HydrationBoundary state={dehydrate(queryClient)}>
             <Suspense fallback={<LoadingDisplay title="Loading your agents" description="Hold on tight! It might take a while..." />}>
                 <ErrorBoundary fallback={<ErrorDisplay title="Failed to load agents" description="Please try again later or contact support if the issue persists." />}>
-
                     <AgenticView />
                 </ErrorBoundary>
             </Suspense>
