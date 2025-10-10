@@ -1,4 +1,4 @@
-import { CommandCustomDialog, CommandItem, CommandList, CommandInput, CommandEmpty } from "@/components/ui/command";
+import { CommandCustomDialog, CommandItem, CommandList, CommandInput } from "@/components/ui/command";
 import { Dispatch, SetStateAction } from "react";
 
 interface DBCommandPaletteProps {

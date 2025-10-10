@@ -14,13 +14,10 @@ import {
 } from "@/components/ui/dialog"
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer"
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -57,7 +54,7 @@ function CommandCustomDialog({
   if (isMobile) {
     return (
       <Drawer {...props}>
-        <DrawerContent className="p-0 rounded-t-2xl bg-background/95 backdrop-blur-md shadow-lg">
+        <DrawerContent className="p-0 rounded-t-2xl bg-background/95 backdrop-blur-md shadow-lg" >
           <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-muted" />
           <DrawerHeader className="p-4">
             <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
@@ -83,6 +80,7 @@ function CommandCustomDialog({
           "overflow-hidden rounded-2xl border border-border/50 bg-background/80 backdrop-blur-sm shadow-xl transition-all p-0",
           className
         )}
+        showCloseButton={showCloseButton}
       >
         <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
