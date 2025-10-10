@@ -19,7 +19,7 @@ const top = [
     {
         icon: BotMessageSquareIcon,
         label: "Your EdAgents",
-        href: "/edagents",
+        href: "/agentic",
     },
 ]
 

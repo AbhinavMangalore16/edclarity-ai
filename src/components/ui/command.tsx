@@ -12,6 +12,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer"
+import { useIsMobile } from "@/hooks/use-mobile"
 
 function Command({
   className,
@@ -26,6 +34,59 @@ function Command({
       )}
       {...props}
     />
+  )
+}
+
+function CommandCustomDialog({
+  title = "Command Palette",
+  description = "Search for a command to run...",
+  children,
+  className,
+  showCloseButton = true,
+  ...props
+}: React.ComponentProps<typeof Dialog> & {
+  title?: string
+  description?: string
+  className?: string
+  showCloseButton?: boolean
+}) {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <Drawer {...props}>
+        <DrawerContent className="p-0 rounded-t-2xl bg-background/95 backdrop-blur-md shadow-lg" >
+          <div className="mx-auto mt-2 h-1.5 w-12 rounded-full bg-muted" />
+          <DrawerHeader className="p-4">
+            <DrawerTitle className="text-lg font-semibold">{title}</DrawerTitle>
+            <DrawerDescription className="text-sm text-muted-foreground">
+              {description}
+            </DrawerDescription>
+          </DrawerHeader>
+          <div className="overflow-y-auto max-h-[80vh]">
+            <Command className={cn("[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5", "rounded-lg")}>{children}</Command>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    )
+  }
+  return (
+    <Dialog {...props}>
+      <DialogHeader className="sr-only">
+        <DialogTitle>{title}</DialogTitle>
+        <DialogDescription>{description}</DialogDescription>
+      </DialogHeader>
+      <DialogContent
+        className={cn(
+          "overflow-hidden rounded-2xl border border-border/50 bg-background/80 backdrop-blur-sm shadow-xl transition-all p-0",
+          className
+        )}
+        showCloseButton={showCloseButton}
+      >
+        <Command className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
+          {children}
+        </Command>
+      </DialogContent>
+    </Dialog>
   )
 }
 
@@ -174,6 +235,7 @@ function CommandShortcut({
 export {
   Command,
   CommandDialog,
+  CommandCustomDialog,
   CommandInput,
   CommandList,
   CommandEmpty,

@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
-import { PanelLeft, PanelLeftClose, PanelLeftDashed, SearchIcon } from "lucide-react"
+import { PanelLeft, PanelLeftClose, SearchIcon } from "lucide-react"
 import { DBCommandPalette } from "./db-command-palette"
 import { useEffect, useState } from "react"
 

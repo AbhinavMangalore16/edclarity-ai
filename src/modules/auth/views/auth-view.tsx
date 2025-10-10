@@ -10,9 +10,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm, UseFormReturn, FieldValues } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Alert } from "@/components/ui/alert";
-import { TriangleAlertIcon, Github, Apple, LucideIcon } from "lucide-react";
+import { TriangleAlertIcon } from "lucide-react";
 import { FcGoogle } from "react-icons/fc"
-import { FaApple, FaMicrosoft, FaGithub, FaLinkedin } from "react-icons/fa"
+import {  FaGithub, } from "react-icons/fa"
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 
