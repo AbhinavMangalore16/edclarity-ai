@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { pgTable, text, timestamp, boolean, serial, varchar } from "drizzle-orm/pg-core";
+=======
+import { pgTable, text, timestamp, boolean, integer, serial, varchar } from "drizzle-orm/pg-core";
+>>>>>>> main
 import { nanoid } from 'nanoid'
 
 export const user = pgTable("user", {
