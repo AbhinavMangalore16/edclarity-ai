@@ -1,5 +1,4 @@
 import { Card, CardContent } from "@/components/ui/card"
-import { motion } from "framer-motion"
 import { AlertTriangle } from "lucide-react"
 
 interface ErrorDisplayProps {
@@ -9,12 +8,8 @@ interface ErrorDisplayProps {
 
 export default function ErrorDisplay({ title, description }: ErrorDisplayProps) {
     const shimmer = (
-        <motion.div
-            animate={{ backgroundPosition: ["200% 0", "-200% 0"] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="rounded-md bg-gradient-to-r from-red-200 via-red-300 to-red-200 bg-[length:200%_100%]"
-        />
-    )
+    <div className="rounded-md bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 bg-[length:200%_100%] animate-shimmer" />
+  )
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-red-50 to-rose-50">
