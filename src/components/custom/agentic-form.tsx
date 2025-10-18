@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { createAvatar } from "@dicebear/core";
-import { croodlesNeutral, glass, identicon, rings } from "@dicebear/collection";
+import { adventurer, croodlesNeutral, glass, identicon, rings } from "@dicebear/collection";
 
 import {
     FieldSet,
@@ -23,6 +23,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
+import Image from "next/image";
+
 
 interface AgenticFormProps {
     onSuccess?: () => void;
@@ -30,54 +32,53 @@ interface AgenticFormProps {
     initValues?: AgenticGetOne;
 }
 
+
 export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProps) => {
     const trpc = useTRPC();
     const queryClient = useQueryClient();
     const [step, setStep] = useState(1);
     const [fileUploading, setFileUploading] = useState(false);
+    const [avatar, setAvatar] = useState<string | null>(null);
 
     const isEdit = !!initValues?.id;
 
-    const form = useForm<z.infer<typeof agenticSchema>>({
+    const form = useForm({
         resolver: zodResolver(agenticSchema),
-        defaultValues: initValues
-            ? {
-                name: initValues.name,
-                instructions: initValues.instructions,
-                metadata:
-                    typeof initValues.metadata === "string"
-                        ? JSON.parse(initValues.metadata)
-                        : initValues.metadata,
-            }
-            : {
-                name: "",
-                instructions: "",
-                metadata: {
-                    personality: "Default",
-                    level: "Beginner",
-                    topics: [],
-                    resources: [],
-                    notes: "",
-                    goals: [],
-                },
+        defaultValues: {
+            name: "",
+            instructions: "",
+            metadata: {
+                personality: "Default",
+                level: "Beginner",
+                topics: [],
+                resources: [],
+                notes: "",
+                goals: [],
             },
+        },
     });
 
     // Watch name for avatar
     const nameValue = useWatch({ control: form.control, name: "name" });
     const topics = useWatch({ control: form.control, name: "metadata.topics" });
     const goals = useWatch({ control: form.control, name: "metadata.goals" });
-    const avatar = useMemo(
-        () => createAvatar(rings, { seed: nameValue, size: 16 }).toDataUri(),
-        [nameValue]
-    );
+    useEffect(() => {
+        if (!nameValue) return;
 
+        // dynamically import DiceBear to avoid SSR
+        import("@dicebear/core").then(({ createAvatar }) => {
+            import("@dicebear/collection").then(({ adventurer }) => {
+                const svg = createAvatar(adventurer, { seed: nameValue, size: 16 }).toDataUri();
+                setAvatar(svg);
+            });
+        });
+    }, [nameValue]);
     // Mutations
     const createAgent = useMutation(trpc.agents.create.mutationOptions({
         onSuccess: async () => {
             await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions());
             if (initValues?.id) {
-                await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({id: initValues.id}));
+                await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions());
             }
             onSuccess?.();
         },
@@ -142,11 +143,15 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                             <Field>
                                 <FieldLabel>Avatar</FieldLabel>
                                 <FieldContent className="flex justify-center items-center w-full">
-                                    <img
-                                        src={avatar}
-                                        alt="Avatar"
-                                        className="w-36 h-36 rounded-full border-2 border-gray-200"
-                                    />
+                                    {avatar ? (
+                                        <img
+                                            src={avatar}
+                                            alt="Avatar"
+                                            className="w-36 h-36 rounded-full border-2 border-gray-200"
+                                        />
+                                    ) : (
+                                        <div className="w-36 h-36 rounded-full border-2 border-gray-200 bg-gray-100" />
+                                    )}
                                 </FieldContent>
                             </Field>
 
@@ -183,7 +188,9 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                                 <FieldLabel>Personality</FieldLabel>
                                 <FieldContent>
                                     <Select
-                                        onValueChange={(v) => form.setValue("metadata.personality", v as any)}
+                                        onValueChange={(v: "Default" | "Friendly" | "Strict" | "Professional" | "Playful") =>
+                                            form.setValue("metadata.personality", v)
+                                        }
                                         defaultValue={form.getValues("metadata.personality")}
                                     >
                                         <SelectTrigger>
@@ -202,7 +209,9 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                                 <FieldLabel>Difficulty Level</FieldLabel>
                                 <FieldContent>
                                     <Select
-                                        onValueChange={(v) => form.setValue("metadata.level", v as any)}
+                                        onValueChange={(v: "Novice" | "Beginner" | "Intermediate" | "Advanced" | "Expert") =>
+                                            form.setValue("metadata.level", v)
+                                        }
                                         defaultValue={form.getValues("metadata.level")}
                                     >
                                         <SelectTrigger>

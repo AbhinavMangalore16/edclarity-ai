@@ -3,50 +3,60 @@ import {z} from "zod";
 export const agenticMetadataSchema = z.object({
   personality: z
     .enum(["Default", "Friendly", "Strict", "Professional", "Playful"])
-    .default("Default")
-    .describe("Defines how the agent interacts with users."),
-  
+    .optional()
+    .default("Default"),
+
   level: z
     .enum(["Novice", "Beginner", "Intermediate", "Advanced", "Expert"])
-    .default("Beginner")
-    .describe("Determines the agent’s knowledge depth and response complexity."),
-  
+    .optional()
+    .default("Beginner"),
+
   topics: z
     .array(z.string().min(2, "Topic name must have at least 2 characters"))
     .optional()
-    .default([])
-    .describe("List of topics the agent specializes in."),
-  
+    .default([]),
+
   resources: z
     .array(
       z
         .string()
         .refine(
-          (value) =>
-            /^https?:\/\//.test(value) || value.length > 3,
-          "Resource must be a valid URL or a descriptive title"
+          (value) => /^https?:\/\//.test(value) || value.length > 3,
+          "Resource must be a valid URL or descriptive title"
         )
     )
     .optional()
-    .default([])
-    .describe("Links or reference names the agent uses for context."),
-  
+    .default([]),
+
   notes: z
     .string()
     .max(500, "Notes cannot exceed 500 characters")
     .optional()
-    .default("")
-    .describe("Custom notes or special behavior instructions for the agent."),
-  
+    .default(""),
+
   goals: z
     .array(z.string().min(3, "Goal must be at least 3 characters long"))
     .optional()
-    .default([])
-    .describe("Specific objectives or intended behaviors for this agent."),
+    .default([]),
 });
 
-export const agenticSchema = z.object({
-    name: z.string().nonempty({ message: "Name is required" }).min(1, "Agentic name is required"),
-    instructions: z.string().nonempty({ message: "Instructions are required" }).min(1, "Instructions are required"),
+
+
+export const agenticSchema = z
+  .object({
+    name: z.string().min(1, "Agent name is required"),
+    instructions: z.string().min(1, "Instructions are required"),
     metadata: agenticMetadataSchema,
-})
+  })
+  .strict()
+  .transform((data) => ({
+    ...data,
+    metadata: {
+      personality: data.metadata.personality ?? "Default",
+      level: data.metadata.level ?? "Beginner",
+      topics: data.metadata.topics ?? [],
+      resources: data.metadata.resources ?? [],
+      notes: data.metadata.notes ?? "",
+      goals: data.metadata.goals ?? [],
+    },
+  }));
