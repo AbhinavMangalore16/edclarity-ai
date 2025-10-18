@@ -6,8 +6,17 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import ErrorDisplay from "@/components/custom/error-display";
 import { AgenticListAdd } from "@/components/custom/agentic-list-add";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 const Page = async () => {
+    const session = await auth.api.getSession({
+        headers: await headers(),
+    });
+    if (!session){
+        redirect("/login");
+    }
     // server pre-fetching..
     const queryClient = getQueryClient();
     void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());

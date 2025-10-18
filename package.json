@@ -15,8 +15,8 @@
     "db:deploy": "drizzle-kit deploy"
   },
   "dependencies": {
-    "@dicebear/collection": "^9.2.3",
-    "@dicebear/core": "^9.2.3",
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@google/genai": "^1.10.0",
