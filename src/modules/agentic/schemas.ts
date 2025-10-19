@@ -42,11 +42,29 @@ export const agenticMetadataSchema = z.object({
 
 
 
-export const agenticSchema = z
-  .object({
-    name: z.string().min(1, "Agent name is required"),
-    instructions: z.string().min(1, "Instructions are required"),
-    metadata: agenticMetadataSchema,
+const baseAgenticSchema = z.object({
+  name: z.string().min(1, "Agent name is required"),
+  instructions: z.string().min(1, "Instructions are required"),
+  metadata: agenticMetadataSchema,
+});
+
+export const agenticSchema = baseAgenticSchema
+  .strict()
+  .transform((data) => ({
+    ...data,
+    metadata: {
+      personality: data.metadata.personality ?? "Default",
+      level: data.metadata.level ?? "Beginner",
+      topics: data.metadata.topics ?? [],
+      resources: data.metadata.resources ?? [],
+      notes: data.metadata.notes ?? "",
+      goals: data.metadata.goals ?? [],
+    },
+  }));
+
+export const agenticUpdationSchema = baseAgenticSchema
+  .extend({
+    id: z.string().min(1, { message: "ID is required!" }),
   })
   .strict()
   .transform((data) => ({

@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { agents } from "@/db/schema";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
-import { agenticMetadataSchema, agenticSchema } from "../schemas";
+import { agenticMetadataSchema, agenticSchema, agenticUpdationSchema } from "../schemas";
 import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
@@ -22,7 +22,7 @@ export const agenticRouter = createTRPCRouter({
         const [row] = await db.select({ ...getTableColumns(agents), meetingCount: sql<number>`5` })
             .from(agents)
             .where(and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)));
-        if (!row) throw new TRPCError({ code: "NOT_FOUND" , message: "Agent NOT FOUND"});
+        if (!row) throw new TRPCError({ code: "NOT_FOUND", message: "Agent NOT FOUND" });
         let parsed: unknown = {};
         try {
             parsed =
@@ -130,5 +130,41 @@ export const agenticRouter = createTRPCRouter({
                 ...input, metadata: metaData, userId: ctx.auth.user.id,
             }).returning();
             return addAgent;
+        }),
+    remove: protectedProcedure
+        .input(z.object({ id: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const [removeAgent] = await db
+                .delete(agents)
+                .where(
+                    and(
+                        eq(agents.id, input.id),
+                        eq(agents.userId, ctx.auth.user.id)
+                    )
+                ).returning();
+            if (!removeAgent) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Agent NOT FOUND" })
+            }
+            return removeAgent;
+        }),
+    update: protectedProcedure
+        .input(agenticUpdationSchema)
+        .mutation(async ({ ctx, input }) => {
+            const [updateAgent] = await db
+                .update(agents)
+                .set({
+                    ...input,
+                    metadata: JSON.stringify(input.metadata),
+                })
+                .where(
+                    and(
+                        eq(agents.id, input.id),
+                        eq(agents.userId, ctx.auth.user.id)
+                    )
+                ).returning();
+                            if (!updateAgent) {
+                throw new TRPCError({ code: "NOT_FOUND", message: "Agent NOT FOUND" })
+            }
+            return updateAgent;
         })
 })

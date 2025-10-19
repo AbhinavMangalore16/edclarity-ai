@@ -83,7 +83,7 @@ export const AgentIdView = ({ agentid }: AgentidViewProps) => {
               variant="outline"
               className="mt-2 flex items-center gap-x-2 text-sm font-medium"
             >
-              <VideoIcon className="size-4" />
+              <VideoIcon className="size-4 text-green-800" />
               {data.meetingCount}{" "}
               {data.meetingCount === 1 ? "meeting" : "meetings"}
             </Badge>
