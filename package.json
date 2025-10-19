@@ -15,12 +15,13 @@
     "db:deploy": "drizzle-kit deploy"
   },
   "dependencies": {
-    "@dicebear/collection": "^9.2.3",
-    "@dicebear/core": "^9.2.3",
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@google/genai": "^1.10.0",
     "@hookform/resolvers": "^5.1.1",
+    "@lottiefiles/react-lottie-player": "^3.6.0",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
     "@neondatabase/serverless": "^1.0.1",
@@ -51,6 +52,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "https://pkg.pr.new/@tanstack/react-query@1568117",
+    "@tanstack/react-table": "^8.21.3",
     "@trpc/client": "^11.1.2",
     "@trpc/server": "^11.1.2",
     "@trpc/tanstack-react-query": "^11.1.2",
