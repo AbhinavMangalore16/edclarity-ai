@@ -13,11 +13,11 @@ import { SearchParams } from "nuqs";
 import { loadSearchParameters } from "@/modules/agentic/params";
 
 interface PageProps{
-  searchParameters: Promise<SearchParams>
+  searchParams: Promise<SearchParams>
 }
 
-const Page = async ({searchParameters}: PageProps) => {
-    const filters = await loadSearchParameters(searchParameters);
+const Page = async ({searchParams}: PageProps) => {
+    const filters = await loadSearchParameters(searchParams);
     const session = await auth.api.getSession({
         headers: await headers(),
     });

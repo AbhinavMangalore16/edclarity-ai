@@ -16,7 +16,7 @@ export const Avatar = ({ seed }: { seed: string }) => {
   return <img src={uri} className="size-8" alt="Avatar" />;
 };
 
-export const columns: ColumnDef<AgenticGetMany[number], unknown>[] = [
+export const columns: ColumnDef<AgenticGetMany["data"][number], unknown>[] = [
   {
     accessorKey: "name",
     header: "Agent",
