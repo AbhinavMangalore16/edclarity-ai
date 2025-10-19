@@ -24,6 +24,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { toast } from "sonner";
 import Image from "next/image";
+import { Progress } from "../ui/progress";
 
 
 interface AgenticFormProps {
@@ -129,7 +130,8 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
 
     return (
         <form className="space-y-6 w-full pb-20" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className="flex flex-col h-[65vh] overflow-y-auto space-y-4 pb-32">
+            <Progress value={step/3*100}/>
+            <div className="flex flex-col h-[50vh] overflow-y-auto space-y-4 scroll-pb-32">
                 <FieldSet className="space-y-6">
                     <FieldTitle className="text-2xl font-semibold mb-4">
                         {step === 1 && "Step 1: Basic Info"}
@@ -154,16 +156,16 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                                     )}
 
                                     <span className="text-[10px] text-gray-400 text-center mt-2 max-w-xs">
-                                       Artistic style lovingly inspired by{" "}
+                                        Artistic style lovingly inspired by{" "}
                                         <a
-                                            href="https://www.instagram.com/lischi_art/" 
+                                            href="https://www.instagram.com/lischi_art/"
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="underline hover:opacity-80 bg-gradient-to-r from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-transparent bg-clip-text"
                                         >
                                             @lischi_art
                                         </a>
-                                        , licensed under {" "} 
+                                        , licensed under {" "}
                                         <a
                                             href="https://creativecommons.org/licenses/by/4.0/"
                                             target="_blank"
@@ -172,8 +174,8 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                                         >
                                             CC&nbsp;BY&nbsp;4.0
                                         </a>
-                                        <br/>
-                                         Thank you for the beautiful work!
+                                        <br />
+                                        Thank you for the beautiful work!
                                     </span>
                                 </FieldContent>
                             </Field>
@@ -319,40 +321,43 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                         </>
                     )}
                 </FieldSet>
-            </div>
+                <div className="flex justify-between mt-4">
+                    {step > 1 ? (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            onClick={() => setStep((s) => s - 1)}
+                        >
+                            ← Back
+                        </Button>
+                    ) : (
+                        <div />
+                    )}
 
-            {/* Pagination */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white py-3 px-4 border-t flex justify-between items-center shadow-md">
-                {step > 1 ? (
-                    <Button type="button" variant="ghost" onClick={() => setStep(s => s - 1)}>
-                        ← Back
+                    <Button
+                        type="button"
+                        onClick={async () => {
+                            if (step === 1) {
+                                const valid = await form.trigger(["name", "instructions"]);
+                                if (!valid) return;
+                                setStep(2);
+                            } else if (step === 2) {
+                                setStep(3);
+                            } else if (step === 3) {
+                                form.handleSubmit(onSubmit)();
+                            }
+                        }}
+                        disabled={isPending}
+                    >
+                        {step < 3 ? "Next →" : isEdit ? "Update Agent" : "Create Agent"}
                     </Button>
-                ) : <div />}
-
-                <Button
-                    type="button"
-                    onClick={async () => {
-                        if (step === 1) {
-                            const valid = await form.trigger(["name", "instructions"]);
-                            if (!valid) return;
-                            setStep(2);
-                        } else if (step === 2) {
-                            setStep(3);
-                        } else if (step === 3) {
-                            form.handleSubmit(onSubmit)();
-                        }
-                    }}
-                    disabled={isPending}
-                >
-                    {step < 3 ? "Next →" : isEdit ? "Update Agent" : "Create Agent"}
-                </Button>
-            </div>
-
-            {onCancel && (
-                <div className="flex justify-end mt-4">
-                    <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
                 </div>
-            )}
+                {onCancel && (
+                    <div className="flex justify-end mt-4">
+                        <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
+                    </div>
+                )}
+            </div>
         </form>
     );
 };
