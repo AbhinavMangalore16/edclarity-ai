@@ -7,9 +7,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
-import { useState, useMemo, useEffect } from "react";
-import { createAvatar } from "@dicebear/core";
-import { adventurer, croodlesNeutral, glass, identicon, rings } from "@dicebear/collection";
+import { useState, useEffect } from "react";
+// import { createAvatar } from "@dicebear/core";
+// import { adventurer, croodlesNeutral, glass, identicon, rings } from "@dicebear/collection";
 
 import {
     FieldSet,
@@ -142,7 +142,7 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                         <>
                             <Field>
                                 <FieldLabel>Avatar</FieldLabel>
-                                <FieldContent className="flex justify-center items-center w-full">
+                                <FieldContent className="flex flex-col justify-center items-center w-full gap-2">
                                     {avatar ? (
                                         <img
                                             src={avatar}
@@ -152,6 +152,29 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                                     ) : (
                                         <div className="w-36 h-36 rounded-full border-2 border-gray-200 bg-gray-100" />
                                     )}
+
+                                    <span className="text-[10px] text-gray-400 text-center mt-2 max-w-xs">
+                                       Artistic style lovingly inspired by{" "}
+                                        <a
+                                            href="https://www.instagram.com/lischi_art/" 
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline hover:opacity-80 bg-gradient-to-r from-[#f9ce34] via-[#ee2a7b] to-[#6228d7] text-transparent bg-clip-text"
+                                        >
+                                            @lischi_art
+                                        </a>
+                                        , licensed under {" "} 
+                                        <a
+                                            href="https://creativecommons.org/licenses/by/4.0/"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="underline hover:text-gray-600"
+                                        >
+                                            CC&nbsp;BY&nbsp;4.0
+                                        </a>
+                                        <br/>
+                                         Thank you for the beautiful work!
+                                    </span>
                                 </FieldContent>
                             </Field>
 

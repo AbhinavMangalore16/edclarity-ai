@@ -16,14 +16,15 @@ export const AgenticView = () => {
     const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions());
     return (
         <div className="flex-1 pb-4 px-2 md:px-8 flex flex-col gap-y-4">
-            <DataTable<AgenticGetMany[number], unknown>
-                data={data} // ✅ now metadata is object, not string
-                columns={columns}
-            />
-            {data.length === 0 && (
+            {data.length === 0 ? (
                 <EmptyAgents
                     title="Create your first agent now!"
                     description="You don&apos;t have any agents yet. Start by adding one to get personalized automation or assistance."
+                />
+            ) : (
+                <DataTable<AgenticGetMany[number], unknown>
+                    data={data} 
+                    columns={columns}
                 />
             )}
         </div>

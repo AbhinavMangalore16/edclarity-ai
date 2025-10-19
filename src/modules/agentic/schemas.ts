@@ -21,7 +21,7 @@ export const agenticMetadataSchema = z.object({
       z
         .string()
         .refine(
-          (value) => /^https?:\/\//.test(value) || value.length > 3,
+          (value) => /^https?:\/\//.test(value) || value.length > 10,
           "Resource must be a valid URL or descriptive title"
         )
     )

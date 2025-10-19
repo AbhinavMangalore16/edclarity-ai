@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import { AgenticGetMany, AgenticGetOne } from "../../types"
 import { createAvatar } from "@dicebear/core";
-import { adventurer, rings } from "@dicebear/collection";
+import { adventurer} from "@dicebear/collection";
 import { CornerDownRightIcon, VideoIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
@@ -38,10 +38,10 @@ export const columns: ColumnDef<AgenticGetMany[number], unknown>[] = [
   {
     accessorKey: "meetingCount",
     header: "Meetings",
-    cell: () => (
+    cell: ({row}) => (
       <Badge variant="outline" className="flex">
         <VideoIcon className="text-green-800" />
-        3 meetings
+        {row.original.meetingCount} meetings
       </Badge>
     ),
   },
