@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 // import { DialogCustom } from "@/components/custom/dialog-custom";
 // import { Button } from "@/components/ui/button";
@@ -7,15 +7,16 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { DataTable } from "../components/data-table";
 import { columns } from "../components/columns";
 import EmptyAgents from "@/components/extras/empty-agents";
-import type { AgenticGetMany } from "@/modules/agentic/types";
 import { useAgentFilter } from "../../hooks/useAgenticFilter";
 import { PaginatedAgents } from "@/components/custom/paginated-agents";
+import { useRouter } from "next/navigation";
 
 
 
 export const AgenticView = () => {
     const trpc = useTRPC();
     const [filters, setFilters] = useAgentFilter();
+    const router = useRouter();
     const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions({
         ...filters,
     }));
@@ -31,6 +32,7 @@ export const AgenticView = () => {
                     <DataTable
                         data={data.data}
                         columns={columns}
+                        onRowClick={(row)=>router.push(`/agentic/${row.id}`)}
                     />
                     <PaginatedAgents page={filters.page} totalPages={data.totalPages} onPageChange={(page) => setFilters({ page })} />
                 </>

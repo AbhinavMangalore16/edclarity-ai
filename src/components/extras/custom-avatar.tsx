@@ -1,4 +1,4 @@
-import {botttsNeutral , initials} from '@dicebear/collection';
+import {adventurer, botttsNeutral , initials} from '@dicebear/collection';
 import { createAvatar } from '@dicebear/core';
 import { Avatar } from '@radix-ui/react-avatar';
 import { AvatarFallback, AvatarImage } from '../ui/avatar';
@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 interface CustomAvatarProps {
     seed: string;
     className?: string;
-    variant: "initials" | "botttsNeutral";
+    variant: "initials" | "botttsNeutral" | "adventurer";
 }
 
 export const CustomAvatar = ({ seed, className, variant}: CustomAvatarProps) => {
@@ -17,7 +17,11 @@ export const CustomAvatar = ({ seed, className, variant}: CustomAvatarProps) => 
         avatar = createAvatar(botttsNeutral, {
             seed
         })
-    } else {
+    } 
+    else if (variant === "adventurer"){
+        avatar = createAvatar(adventurer, {seed})
+    }
+    else {
         avatar = createAvatar(initials, {
             seed,
             fontWeight: 500,
@@ -26,7 +30,7 @@ export const CustomAvatar = ({ seed, className, variant}: CustomAvatarProps) => 
         })
     }
     return (
-        <Avatar className={cn(className, "w-10 h-10")}>
+        <Avatar className={cn(className, "w-16 h-12")}>
             <AvatarImage src = {avatar.toDataUri()} className={className} alt="Avatar" />
             <AvatarFallback>
                 {variant === "initials" ? seed.charAt(0).toUpperCase() : null}

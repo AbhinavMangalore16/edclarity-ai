@@ -22,7 +22,7 @@ export const agenticRouter = createTRPCRouter({
         const [row] = await db.select({ ...getTableColumns(agents), meetingCount: sql<number>`5` })
             .from(agents)
             .where(and(eq(agents.id, input.id), eq(agents.userId, ctx.auth.user.id)));
-        if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+        if (!row) throw new TRPCError({ code: "NOT_FOUND" , message: "Agent NOT FOUND"});
         let parsed: unknown = {};
         try {
             parsed =
