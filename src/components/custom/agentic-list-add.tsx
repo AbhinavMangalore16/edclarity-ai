@@ -1,22 +1,43 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, XCircleIcon } from "lucide-react";
 import { Button } from "../ui/button";
 import { AgenticDialog } from "./agentic-dialog";
 import { useState } from "react";
+import { useAgentFilter } from "@/modules/agentic/hooks/useAgenticFilter";
+import { AgenticFilter } from "./agentic-filter";
+import { DEFAULT_PAGE } from "@/constants";
 
 export const AgenticListAdd = () => {
-    const [isAgenticDialogOpen, setAgenticDialogOpen] = useState(false);
+  const [filters, setFilters] = useAgentFilter();
+  const [isAgenticDialogOpen, setAgenticDialogOpen] = useState(false);
+  const isFilterModify = !!filters.search;
+  const onClearFilters = () => {
+    setFilters({
+      search: "",
+      page: DEFAULT_PAGE
+    })
+  }
   return (
     <>
-    <AgenticDialog open={isAgenticDialogOpen} onOpenChange={setAgenticDialogOpen}/>
-    <div className="flex items-center justify-between mb-4 px-4 py-2 md:px-8">
-      <h3 className="text-lg font-semibold text-gray-800">Your Agents</h3>
-      <Button type="button" className="flex items-center gap-2" onClick={() => setAgenticDialogOpen(true)}>
-        <PlusIcon className="w-4 h-4" />
-        Add New Agent
-      </Button>
-    </div>
+      <AgenticDialog open={isAgenticDialogOpen} onOpenChange={setAgenticDialogOpen} />
+      <div className="flex items-center justify-between mb-4 px-4 py-2 md:px-8">
+        <h3 className="text-lg font-semibold text-gray-800">Your Agents</h3>
+        <Button type="button" className="flex items-center gap-2" onClick={() => setAgenticDialogOpen(true)}>
+          <PlusIcon className="w-4 h-4" />
+          Add New Agent
+        </Button>
+      </div>
+      <div className="flex items-center gap-x-2 ml-4 p-4">
+        <AgenticFilter/>
+        {
+          isFilterModify && (
+            <Button variant="outline" size="sm" onClick={onClearFilters}>
+              <XCircleIcon/>
+            </Button>
+          )
+        }
+      </div>
     </>
   );
 };

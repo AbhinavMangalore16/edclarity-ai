@@ -1,20 +1,22 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import DashboardSidebar from "@/modules/dashboard/ui/components/dashboard-sidebar";
 import { DBNavbar } from "@/modules/dashboard/ui/components/db-navbar";
-
-interface Props{
-    children: React.ReactNode;
+import {NuqsAdapter} from "nuqs/adapters/next"
+interface Props {
+  children: React.ReactNode;
 }
 
 const Layout = ({ children }: Props) => {
   return (
-    <SidebarProvider>
+    <NuqsAdapter>
+      <SidebarProvider>
         <DashboardSidebar />
         <main className="flex flex-col h-screen w-screen bg-muted">
-        <DBNavbar/>
-        {children}
+          <DBNavbar />
+          {children}
         </main>
-    </SidebarProvider>
+      </SidebarProvider>
+    </NuqsAdapter>
   );
 }
 export default Layout;

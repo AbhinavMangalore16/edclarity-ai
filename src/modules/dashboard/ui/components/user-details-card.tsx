@@ -1,4 +1,4 @@
-import { CustomAvatar } from "@/components/custom/custom-avatar";
+import { CustomAvatar } from "@/components/extras/custom-avatar";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerFooter, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";

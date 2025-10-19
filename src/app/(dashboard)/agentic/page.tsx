@@ -1,16 +1,23 @@
-import LoadingDisplay from "@/components/custom/loading-display";
+import LoadingDisplay from "@/components/extras/loading-display";
 import { AgenticView } from "@/modules/agentic/ui/views/agentic-view"
 import { ErrorBoundary } from "react-error-boundary";
 import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
-import ErrorDisplay from "@/components/custom/error-display";
+import ErrorDisplay from "@/components/extras/error-display";
 import { AgenticListAdd } from "@/components/custom/agentic-list-add";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { SearchParams } from "nuqs";
+import { loadSearchParameters } from "@/modules/agentic/params";
 
-const Page = async () => {
+interface PageProps{
+  searchParameters: Promise<SearchParams>
+}
+
+const Page = async ({searchParameters}: PageProps) => {
+    const filters = await loadSearchParameters(searchParameters);
     const session = await auth.api.getSession({
         headers: await headers(),
     });
@@ -19,7 +26,7 @@ const Page = async () => {
     }
     // server pre-fetching..
     const queryClient = getQueryClient();
-    void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions());
+    void queryClient.prefetchQuery(trpc.agents.getMany.queryOptions({...filters,}));
     return (
         <>
             <AgenticListAdd/>

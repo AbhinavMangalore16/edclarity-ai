@@ -41,7 +41,7 @@ export const columns: ColumnDef<AgenticGetMany[number], unknown>[] = [
     cell: ({row}) => (
       <Badge variant="outline" className="flex">
         <VideoIcon className="text-green-800" />
-        {row.original.meetingCount} meetings
+        {row.original.meetingCount} {row.original.meetingCount===1 ? "meeting": "meetings"}
       </Badge>
     ),
   },
