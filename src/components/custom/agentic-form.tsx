@@ -41,11 +41,12 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
     const [fileUploading, setFileUploading] = useState(false);
     const [avatar, setAvatar] = useState<string | null>(null);
 
+
     const isEdit = !!initValues?.id;
 
     const form = useForm({
         resolver: zodResolver(agenticSchema),
-        defaultValues: {
+        defaultValues: initValues ?? {
             name: "",
             instructions: "",
             metadata: {
@@ -74,12 +75,41 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
             });
         });
     }, [nameValue]);
+    useEffect(() => {
+        if (initValues) {
+            form.reset({
+                name: initValues.name || "",
+                instructions: initValues.instructions || "",
+                metadata: {
+                    personality: initValues.metadata?.personality || "Default",
+                    level: initValues.metadata?.level || "Beginner",
+                    topics: initValues.metadata?.topics || [],
+                    resources: initValues.metadata?.resources || [],
+                    notes: initValues.metadata?.notes || "",
+                    goals: initValues.metadata?.goals || [],
+                },
+            });
+        }
+    }, [initValues, form]);
+
     // Mutations
     const createAgent = useMutation(trpc.agents.create.mutationOptions({
         onSuccess: async () => {
             await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
+            // if (initValues?.id) {
+            //     await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
+            // }
+            onSuccess?.();
+        },
+        onError: (error) => {
+            toast.error(error.message);
+        },
+    }));
+    const updateAgent = useMutation(trpc.agents.update.mutationOptions({
+        onSuccess: async () => {
+            await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
             if (initValues?.id) {
-                await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
+                await queryClient.invalidateQueries(trpc.agents.getOne.queryOptions({ id: initValues.id }));
             }
             onSuccess?.();
         },
@@ -88,9 +118,10 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
         },
     }));
 
+
     const onSubmit = (values: z.infer<typeof agenticSchema>) => {
         if (isEdit) {
-            console.log("TODO: Update logic for edit");
+            updateAgent.mutate({ ...values, id: initValues.id });
         } else {
             createAgent.mutate(values);
         }
@@ -112,7 +143,7 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
         form.setValue(`metadata.${type}`, arr);
     };
 
-    const isPending = createAgent.isPending;
+    const isPending = createAgent.isPending || updateAgent.isPending;
 
     const submitStep = async () => {
         if (step === 1) {
@@ -130,7 +161,7 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
 
     return (
         <form className="space-y-6 w-full pb-20" onSubmit={form.handleSubmit(onSubmit)}>
-            <Progress value={step/3*100}/>
+            <Progress value={step / 3 * 100} />
             <div className="flex flex-col h-[50vh] overflow-y-auto space-y-4 scroll-pb-32">
                 <FieldSet className="space-y-6">
                     <FieldTitle className="text-2xl font-semibold mb-4">

@@ -21,6 +21,7 @@ import {
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useConfirm } from "../../hooks/useConfirm";
+import { UpdationAgenticDialog } from "@/components/custom/updation-agentic-dialog";
 
 // Helper: Assign Tailwind color classes based on value
 const getPersonalityColor = (personality: string) => {
@@ -79,6 +80,7 @@ export const AgentIdView = ({ agentid }: AgentidViewProps) => {
         `This action shall remove ${data.meetingCount} associated meetings!`
     )
 
+    const [isOpenUpdateDialog, setIsOpenUpdateDialog] = useState(false);
     const handleRemoveAgent = async () => {
         const removingNow = await confirmedRemoved();
         if (!removingNow) return;
@@ -98,11 +100,16 @@ export const AgentIdView = ({ agentid }: AgentidViewProps) => {
     return (
         <>
             <RemoveConfirm />
+            <UpdationAgenticDialog
+                open={isOpenUpdateDialog}
+                onOpenChange={setIsOpenUpdateDialog}
+                initValues={data}
+            />
             <div className="flex-1 pb-4 px-4 md:px-8 flex flex-col gap-y-6">
                 <AgentIdViewHeader
                     agentid={agentid}
                     agentName={data.name}
-                    onEdit={() => { }}
+                    onEdit={() => { setIsOpenUpdateDialog(true); }}
                     onRemove={handleRemoveAgent}
                 />
 
