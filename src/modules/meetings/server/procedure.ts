@@ -6,9 +6,21 @@ import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { DEFAULT_PAGE, DEFAULT_PAGESIZE, MAX_PAGESIZE, MIN_PAGESIZE } from "@/constants";
+import { meetingSchema } from "../schema";
 // import { TRPCError } from "@trpc/server";
 
 export const meetingRouter = createTRPCRouter({
+    create: protectedProcedure
+    .input(meetingSchema)
+    .mutation(async({input, ctx})=>{
+        const [createdMeeting] = await db.insert(meetings)
+        .values({
+            ...input, 
+            userId: ctx.auth.user.id, 
+        }).returning();
+        return createdMeeting;
+    })
+    ,
     getOne: protectedProcedure
         .input(z.object({ id: z.string() }))
         .query(async ({ input, ctx }) => {
@@ -39,7 +51,7 @@ export const meetingRouter = createTRPCRouter({
                         search ? ilike(meetings.name, `%${search}%`) : undefined
                     )
                 )
-                .orderBy(desc(meetings.createdAt))
+                .orderBy(desc(meetings.createdAt), desc(meetings.id))
                 .limit(pageSize)
                 .offset((page - 1) * pageSize);
 
