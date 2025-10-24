@@ -12,10 +12,7 @@ export const AgenticDialog = ({open, onOpenChange}: AgenticDialogProps) =>{
     const router = useRouter();
     return (
         <DialogCustom title="New Agent" description="Create a new agent" open={open} onOpenChange={onOpenChange}>
-            <AgenticForm onSuccess={
-                (id)=> {onOpenChange(false);
-                router.push(`/agentic/"${id}`)}
-                } onCancel={()=>onOpenChange(false)}/>
+            <AgenticForm onSuccess={()=> onOpenChange(false)} onCancel={()=>onOpenChange(false)}/>
         </DialogCustom>
     )
 }

@@ -17,10 +17,12 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { CustomAvatar } from "@/components/extras/custom-avatar";
 import { useState } from "react";
 import { Selection } from "@/components/extras/selection";
+import { AgenticDialog } from "@/components/custom/agentic-dialog";
 
 interface MeetingFormProps {
   onSuccess?: (id?: string) => void;
@@ -31,7 +33,7 @@ interface MeetingFormProps {
 export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProps) => {
   const trpc = useTRPC();
   const queryClient = useQueryClient();
-  const [open, setOpen] = useState(false);
+  const [openAgentic, setOpenAgentic] = useState(false);
   const [searchAgent, setSearchAgent] = useState("");
   const agentis = useQuery(
     trpc.agents.getMany.queryOptions({pageSize: 10, search: searchAgent}),
@@ -86,6 +88,8 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
   };
 
   return (
+    <>
+    <AgenticDialog open={openAgentic} onOpenChange={setOpenAgentic} />
     <Form {...form}>
       <form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
         {/* Avatar */}
@@ -131,6 +135,12 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
                   ),
                 }))} placeholder="Select an agent" onSearch={setSearchAgent} value={field.value} onSelect={field.onChange} />
               </FormControl>
+              <FormDescription>
+                Didn't find an agent?
+                <Button type="button" variant="link" className="p-0 ml-1 text-primary hover:underline" onClick={() => setOpenAgentic(true)}>
+                  Create a new one here!
+                </Button>
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -150,10 +160,11 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
             </Button>
           )}
           <Button type="submit" className="flex-1" disabled={isPending}>
-            {isEdit ? "Update Meeting" : "Create Meeting"}
+            {isEdit ? "Update Meeting" : "Schedule Meeting"}
           </Button>
         </div>
       </form>
     </Form>
+  </>
   );
 };

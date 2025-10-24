@@ -4,9 +4,9 @@
 // import { Button } from "@/components/ui/button";
 import { useTRPC } from "@/trpc/client"
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { DataTable } from "../components/data-table";
+import { DataTable } from "../components/agentic-data-table";
 import { columns } from "../components/columns";
-import EmptyAgents from "@/components/extras/empty-agents";
+import EmptyAgents from "@/components/extras/empty-state";
 import { useAgentFilter } from "../../hooks/useAgenticFilter";
 import { PaginatedAgents } from "@/components/custom/paginated-agents";
 import { useRouter } from "next/navigation";

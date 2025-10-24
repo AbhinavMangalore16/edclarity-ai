@@ -1,5 +1,5 @@
 import { db } from "@/db";
-import { meetings } from "@/db/schema";
+import { agents, meetings } from "@/db/schema";
 import { baseProcedure, createTRPCRouter, protectedProcedure } from "@/trpc/init";
 // import { agenticMetadataSchema, agenticSchema, agenticUpdationSchema } from "../schemas";
 import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
@@ -11,15 +11,15 @@ import { meetingSchema, meetingUpdationSchema } from "../schemas";
 
 export const meetingRouter = createTRPCRouter({
     create: protectedProcedure
-    .input(meetingSchema)
-    .mutation(async({input, ctx})=>{
-        const [createdMeeting] = await db.insert(meetings)
-        .values({
-            ...input, 
-            userId: ctx.auth.user.id, 
-        }).returning();
-        return createdMeeting;
-    })
+        .input(meetingSchema)
+        .mutation(async ({ input, ctx }) => {
+            const [createdMeeting] = await db.insert(meetings)
+                .values({
+                    ...input,
+                    userId: ctx.auth.user.id,
+                }).returning();
+            return createdMeeting;
+        })
     ,
     getOne: protectedProcedure
         .input(z.object({ id: z.string() }))
@@ -43,8 +43,16 @@ export const meetingRouter = createTRPCRouter({
         }))
         .query(async ({ input, ctx }) => {
             const { page, pageSize, search } = input;
-            const data = await db.select({ ...getTableColumns(meetings) })
+            const durationExpr = sql<number>`
+                CASE 
+                    WHEN ${meetings.endAt} IS NOT NULL AND ${meetings.startAt} IS NOT NULL 
+                    THEN EXTRACT(EPOCH FROM (${meetings.endAt} - ${meetings.startAt})) 
+                    ELSE NULL 
+                END
+                `.as("duration");
+            const data = await db.select({ ...getTableColumns(meetings), agent: agents, duration: durationExpr })
                 .from(meetings)
+                .innerJoin(agents, eq(meetings.agentId, agents.id))
                 .where(
                     and(
                         eq(meetings.userId, ctx.auth.user.id),
@@ -57,29 +65,31 @@ export const meetingRouter = createTRPCRouter({
 
             const [total] = await db.select({ count: count() })
                 .from(meetings)
+                .innerJoin(agents, eq(meetings.agentId, agents.id))
                 .where(
                     and(
                         eq(meetings.userId, ctx.auth.user.id),
                         search ? ilike(meetings.name, `%${search}%`) : undefined
                     )
                 )
-            const totalCount = Math.ceil(total.count/pageSize);
+            console.log("TOTAL COUNT:", total.count);
+            const totalCount = Math.ceil(total.count / pageSize);
             return { data, total: total.count, totalCount };
         })
     ,
     update: protectedProcedure
-    .input(meetingUpdationSchema).mutation(
-        async({input, ctx})=>{
-            const [updateMeeting] = await db.update(meetings)
-            .set(input)
-            .where(
-                and(
-                    eq(meetings.id, input.id),
-                    eq(meetings.userId, ctx.auth.user.id)
-                )
-            )
-            .returning();
-            if(!updateMeeting){ throw new TRPCError({code: "NOT_FOUND", message: "Meeting NOT FOUND"}); }
-        }
-    )
+        .input(meetingUpdationSchema).mutation(
+            async ({ input, ctx }) => {
+                const [updateMeeting] = await db.update(meetings)
+                    .set(input)
+                    .where(
+                        and(
+                            eq(meetings.id, input.id),
+                            eq(meetings.userId, ctx.auth.user.id)
+                        )
+                    )
+                    .returning();
+                if (!updateMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
+            }
+        )
 })
