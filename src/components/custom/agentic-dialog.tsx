@@ -1,3 +1,4 @@
+import { useRouter } from "next/navigation";
 import { AgenticForm } from "./agentic-form";
 import { DialogCustom } from "./dialog-custom";
 
@@ -8,9 +9,13 @@ interface AgenticDialogProps{
 }
 
 export const AgenticDialog = ({open, onOpenChange}: AgenticDialogProps) =>{
+    const router = useRouter();
     return (
         <DialogCustom title="New Agent" description="Create a new agent" open={open} onOpenChange={onOpenChange}>
-            <AgenticForm onSuccess={()=> onOpenChange(false)} onCancel={()=>onOpenChange(false)}/>
+            <AgenticForm onSuccess={
+                (id)=> {onOpenChange(false);
+                router.push(`/agentic/"${id}`)}
+                } onCancel={()=>onOpenChange(false)}/>
         </DialogCustom>
     )
 }

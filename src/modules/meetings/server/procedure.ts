@@ -6,7 +6,7 @@ import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { DEFAULT_PAGE, DEFAULT_PAGESIZE, MAX_PAGESIZE, MIN_PAGESIZE } from "@/constants";
-import { meetingSchema } from "../schema";
+import { meetingSchema, meetingUpdationSchema } from "../schemas";
 // import { TRPCError } from "@trpc/server";
 
 export const meetingRouter = createTRPCRouter({
@@ -66,4 +66,20 @@ export const meetingRouter = createTRPCRouter({
             const totalCount = Math.ceil(total.count/pageSize);
             return { data, total: total.count, totalCount };
         })
+    ,
+    update: protectedProcedure
+    .input(meetingUpdationSchema).mutation(
+        async({input, ctx})=>{
+            const [updateMeeting] = await db.update(meetings)
+            .set(input)
+            .where(
+                and(
+                    eq(meetings.id, input.id),
+                    eq(meetings.userId, ctx.auth.user.id)
+                )
+            )
+            .returning();
+            if(!updateMeeting){ throw new TRPCError({code: "NOT_FOUND", message: "Meeting NOT FOUND"}); }
+        }
+    )
 })

@@ -28,7 +28,7 @@ import { Progress } from "../ui/progress";
 
 
 interface AgenticFormProps {
-    onSuccess?: () => void;
+    onSuccess?: (id?: string) => void;
     onCancel?: () => void;
     initValues?: AgenticGetOne;
 }
@@ -94,12 +94,12 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
 
     // Mutations
     const createAgent = useMutation(trpc.agents.create.mutationOptions({
-        onSuccess: async () => {
+        onSuccess: async (data) => {
             await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
             // if (initValues?.id) {
             //     await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions({}));
             // }
-            onSuccess?.();
+            onSuccess?.(data.id);
         },
         onError: (error) => {
             toast.error(error.message);

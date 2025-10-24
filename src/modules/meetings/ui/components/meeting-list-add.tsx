@@ -6,7 +6,7 @@ import { MeetingDialog } from "./meeting-dialog";
 
 
 export const MeetingListAdd = () => {
-    const [isMeetingDialogOpen, setIsMeetingDialogOpen] = useState(false);
+  const [isMeetingDialogOpen, setIsMeetingDialogOpen] = useState(false);
   return (
     <>
     <MeetingDialog open={isMeetingDialogOpen} onOpenChange={setIsMeetingDialogOpen}/>
