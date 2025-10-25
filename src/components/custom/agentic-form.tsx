@@ -162,7 +162,7 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
     return (
         <form className="space-y-6 w-full pb-20" onSubmit={form.handleSubmit(onSubmit)}>
             <Progress value={step / 3 * 100} />
-            <div className="flex flex-col h-[50vh] overflow-y-auto space-y-4 scroll-pb-32">
+            <div className="flex flex-col min-h-[60vh] max-h-[80vh] overflow-y-auto space-y-4 pb-32">
                 <FieldSet className="space-y-6">
                     <FieldTitle className="text-2xl font-semibold mb-4">
                         {step === 1 && "Step 1: Basic Info"}
