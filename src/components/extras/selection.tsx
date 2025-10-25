@@ -50,8 +50,8 @@ export const Selection = ({
       <CommandCustomDialog
         open={open}
         onOpenChange={correctOpen}
-        title="Choose your agent"
-        description="Select an agent from the list"
+        title="Make your choice!"
+        description="Select from the list"
         shouldFilter={!onSearch}
       >
         <CommandInput placeholder="Search here..." onValueChange={onSearch} />

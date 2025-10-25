@@ -8,7 +8,7 @@ import { DataTable } from "../components/agentic-data-table";
 import { columns } from "../components/columns";
 import EmptyAgents from "@/components/extras/empty-state";
 import { useAgentFilter } from "../../hooks/useAgenticFilter";
-import { PaginatedAgents } from "@/components/custom/paginated-agents";
+import { PaginatedData } from "@/components/custom/paginated-data";
 import { useRouter } from "next/navigation";
 
 
@@ -34,7 +34,7 @@ export const AgenticView = () => {
                         columns={columns}
                         onRowClick={(row)=>router.push(`/agentic/${row.id}`)}
                     />
-                    <PaginatedAgents page={filters.page} totalPages={data.totalPages} onPageChange={(page) => setFilters({ page })} />
+                    <PaginatedData page={filters.page} totalPages={data.totalPages} onPageChange={(page) => setFilters({ page })} />
                 </>
             )}
         </div>

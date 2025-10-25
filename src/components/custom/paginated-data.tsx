@@ -1,16 +1,16 @@
 import { Button } from "../ui/button";
 
-interface PaginatedAgentsProps{
+interface PaginatedDataProps{
     page: number,
     totalPages: number, 
     onPageChange: (page: number) => void;
 }
 
-export const PaginatedAgents = ({
+export const PaginatedData = ({
     page,
     totalPages, 
     onPageChange,
-}: PaginatedAgentsProps) =>{
+}: PaginatedDataProps) =>{
     return (
         <div className= "flex items-center justify-between">
             <div className="flex-1 text-sm text-muted-foreground">

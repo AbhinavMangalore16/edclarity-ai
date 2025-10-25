@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useAgentFilter } from "@/modules/agentic/hooks/useAgenticFilter";
 import { AgenticFilter } from "@/components/custom/agentic-filter";
 import { DEFAULT_PAGE } from "@/constants";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export const AgenticListAdd = () => {
   const [filters, setFilters] = useAgentFilter();
@@ -28,6 +29,7 @@ export const AgenticListAdd = () => {
           Add New Agent
         </Button>
       </div>
+      <ScrollArea>
       <div className="flex items-center gap-x-2 ml-4 p-4">
         <AgenticFilter/>
         {
@@ -38,6 +40,8 @@ export const AgenticListAdd = () => {
           )
         }
       </div>
+      <ScrollBar orientation="horizontal" />
+      </ScrollArea>
     </>
   );
 };
