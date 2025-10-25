@@ -42,7 +42,7 @@ export const meetingRouter = createTRPCRouter({
             pageSize: z.number().min(MIN_PAGESIZE).max(MAX_PAGESIZE).default(DEFAULT_PAGESIZE),
             search: z.string().nullish(),
             agentId: z.string().nullish(),
-            status: z.enum([MeetingStatus.Upcoming, MeetingStatus.Active, MeetingStatus.Processing, MeetingStatus.Completed, MeetingStatus.Cancelled]).nullish(),
+            status: z.enum([MeetingStatus.Scheduled, MeetingStatus.Active, MeetingStatus.Processing, MeetingStatus.Completed, MeetingStatus.Cancelled]).nullish(),
         }))
         .query(async ({ input, ctx }) => {
             const { page, pageSize, search, status, agentId } = input;

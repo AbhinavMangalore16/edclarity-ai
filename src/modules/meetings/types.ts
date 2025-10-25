@@ -4,7 +4,7 @@ import type {AppRouter} from "@/trpc/routers/_app";
 
 export type MeetingGetOne = inferRouterOutputs<AppRouter>["meetings"]["getOne"];
 export enum MeetingStatus {
-    Upcoming = "scheduled",
+    Scheduled = "scheduled",
     Active = "active",
     Processing = "processing",
     Completed = "completed",

@@ -1,19 +1,24 @@
-"use client"
+"use client";
 
-import { ColumnDef } from "@tanstack/react-table"
-import { MeetingGetMany } from "../../types"
+import { ColumnDef } from "@tanstack/react-table";
+import { MeetingGetMany } from "../../types";
 import { createAvatar } from "@dicebear/core";
-import { adventurer} from "@dicebear/collection";
-import {format} from "date-fns";
+import { adventurer } from "@dicebear/collection";
+import { format } from "date-fns";
 import humanizeDuration from "humanize-duration";
-import { CircleCheckIcon, CircleXIcon, ClockArrowUpIcon, ClockFadingIcon, CornerDownRightIcon, Loader2Icon, LoaderIcon, VideoIcon } from "lucide-react";
+import {
+  CircleCheckIcon,
+  CircleXIcon,
+  ClockArrowUpIcon,
+  ClockFadingIcon,
+  Loader2Icon,
+  LoaderIcon,
+  VideoIcon,
+  CornerDownRightIcon,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
-
-
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 
 export const Avatar = ({ seed }: { seed: string }) => {
   const uri = useMemo(() => createAvatar(adventurer, { seed }).toDataUri(), [seed]);
@@ -25,12 +30,13 @@ function formatDuration(seconds: number) {
 }
 
 const statusIcons = {
-    scheduled: ClockArrowUpIcon, 
-    active: Loader2Icon,
-    processing: LoaderIcon,
-    completed: CircleCheckIcon,
-    cancelled: CircleXIcon
-}
+  scheduled: ClockArrowUpIcon,
+  active: Loader2Icon,
+  processing: LoaderIcon,
+  completed: CircleCheckIcon,
+  cancelled: CircleXIcon,
+};
+
 const statusColors = {
   scheduled: "bg-blue-100 text-blue-700",
   active: "bg-green-100 text-green-700",
@@ -46,6 +52,7 @@ export const columns: ColumnDef<MeetingGetMany[number], unknown>[] = [
     cell: ({ row }) => (
       <div className="flex flex-col gap-y-1">
         <div className="flex items-center gap-x-2">
+          <Avatar seed={row.original.name} />
           <span className="font-semibold capitalize">{row.original.name}</span>
         </div>
         <div className="flex items-center gap-x-1">
@@ -54,33 +61,50 @@ export const columns: ColumnDef<MeetingGetMany[number], unknown>[] = [
             {row.original.agent.name}
           </span>
         </div>
-        <Avatar seed={row.original.name} />
-        <span className="text-sm text-muted-foreground">
-            {row.original.startAt? format(row.original.startAt, "MMM dd, yyyy HH:mm"): "Not started yet"}
-        </span>
       </div>
+    ),
+  },
+  {
+    accessorKey: "startAt",
+    header: "Start Time",
+    cell: ({ row }) => (
+      <span className="text-sm text-muted-foreground">
+        {row.original.startAt
+          ? format(row.original.startAt, "MMM dd, yyyy HH:mm")
+          : "Not started yet"}
+      </span>
     ),
   },
   {
     accessorKey: "status",
     header: "Status",
-    cell: ({row}) => {
-        const Icon = statusIcons[row.original.status as keyof typeof statusIcons];
-        return (
-            <Badge variant="outline" className={cn("capitalize [&>svg]:size-4 text-muted-foreground", statusColors[row.original.status as keyof typeof statusColors])}>
-                <Icon className={cn(row.original.status==="processing" && "animate-spin")}/> {row.original.status} 
-            </Badge>
-        )
-    }
+    cell: ({ row }) => {
+      const Icon = statusIcons[row.original.status as keyof typeof statusIcons];
+      return (
+        <Badge
+          variant="outline"
+          className={cn(
+            "capitalize [&>svg]:size-4 text-muted-foreground flex items-center gap-x-2",
+            statusColors[row.original.status as keyof typeof statusColors]
+          )}
+        >
+          <Icon className={cn(row.original.status === "processing" && "animate-spin")} />
+          {row.original.status}
+        </Badge>
+      );
+    },
   },
-    {
+  {
     accessorKey: "duration",
     header: "Duration",
-    cell: ({row}) => (
-        <Badge variant="outline" className="capitalize [&>svg]:size-4 flex items-center gap-x-2">
-            <ClockFadingIcon className="text-blue-950"/>
-            {row.original.duration? formatDuration(row.original.duration): "N/A"}
-        </Badge>
-    )
+    cell: ({ row }) => (
+      <Badge
+        variant="outline"
+        className="capitalize [&>svg]:size-4 flex items-center gap-x-2"
+      >
+        <ClockFadingIcon className="text-blue-950" />
+        {row.original.duration ? formatDuration(row.original.duration) : "N/A"}
+      </Badge>
+    ),
   },
 ];

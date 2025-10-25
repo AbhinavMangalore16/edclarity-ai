@@ -11,7 +11,7 @@ interface SelectionProps {
   className?: string;
   value?: string;
   onSelect: (value: string) => void;
-  onSearch: (value: string) => void;
+  onSearch?: (value: string) => void;
 }
 
 export const Selection = ({

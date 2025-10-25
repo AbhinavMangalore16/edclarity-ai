@@ -1,11 +1,11 @@
 "use client";
 
 import { PlusIcon, XCircleIcon } from "lucide-react";
-import { Button } from "../ui/button";
-import { AgenticDialog } from "./agentic-dialog";
+import { Button } from "../../../../components/ui/button";
+import { AgenticDialog } from "@/components/custom/agentic-dialog";
 import { useState } from "react";
 import { useAgentFilter } from "@/modules/agentic/hooks/useAgenticFilter";
-import { AgenticFilter } from "./agentic-filter";
+import { AgenticFilter } from "@/components/custom/agentic-filter";
 import { DEFAULT_PAGE } from "@/constants";
 
 export const AgenticListAdd = () => {

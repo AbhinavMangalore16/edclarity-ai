@@ -5,7 +5,7 @@ import { getQueryClient, trpc } from "@/trpc/server";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { Suspense } from "react";
 import ErrorDisplay from "@/components/extras/error-display";
-import { AgenticListAdd } from "@/components/custom/agentic-list-add";
+import { AgenticListAdd } from "@/modules/agentic/ui/components/agentic-list-add";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
