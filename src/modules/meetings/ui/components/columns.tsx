@@ -25,14 +25,14 @@ function formatDuration(seconds: number) {
 }
 
 const statusIcons = {
-    upcoming: ClockArrowUpIcon, 
+    scheduled: ClockArrowUpIcon, 
     active: Loader2Icon,
     processing: LoaderIcon,
     completed: CircleCheckIcon,
     cancelled: CircleXIcon
 }
 const statusColors = {
-  upcoming: "bg-blue-100 text-blue-700",
+  scheduled: "bg-blue-100 text-blue-700",
   active: "bg-green-100 text-green-700",
   processing: "bg-amber-100 text-amber-700",
   completed: "bg-emerald-100 text-emerald-700",

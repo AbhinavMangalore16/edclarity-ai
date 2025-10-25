@@ -64,14 +64,14 @@ export const agents = pgTable("agents", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
 
-export const meetingStatus = pgEnum("meeting_status", ["active", "completed", "processing", "upcoming", "cancelled"]);
+export const meetingStatus = pgEnum("meeting_status", ["active", "completed", "processing", "scheduled", "cancelled"]);
 
 export const meetings = pgTable("meetings", {
   id: text("id").primaryKey().$defaultFn(()=>nanoid()),
   name: text("name").notNull(),
   userId: text("user_id").notNull().references(()=>user.id, {onDelete: "cascade"}),
   agentId: text("agent_id").notNull().references(()=>agents.id, {onDelete: "cascade"}),
-  status: meetingStatus("status").notNull().default("upcoming"),
+  status: meetingStatus("status").notNull().default("scheduled"),
   startAt: timestamp("start_at").notNull().defaultNow(),
   endAt: timestamp("end_at").notNull().defaultNow(),
   transcriptURL: text("transcript_url"),

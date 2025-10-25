@@ -7,6 +7,7 @@ import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { DEFAULT_PAGE, DEFAULT_PAGESIZE, MAX_PAGESIZE, MIN_PAGESIZE } from "@/constants";
 import { meetingSchema, meetingUpdationSchema } from "../schemas";
+import { MeetingStatus } from "../types";
 // import { TRPCError } from "@trpc/server";
 
 export const meetingRouter = createTRPCRouter({
@@ -40,9 +41,11 @@ export const meetingRouter = createTRPCRouter({
             page: z.number().default(DEFAULT_PAGE),
             pageSize: z.number().min(MIN_PAGESIZE).max(MAX_PAGESIZE).default(DEFAULT_PAGESIZE),
             search: z.string().nullish(),
+            agentId: z.string().nullish(),
+            status: z.enum([MeetingStatus.Upcoming, MeetingStatus.Active, MeetingStatus.Processing, MeetingStatus.Completed, MeetingStatus.Cancelled]).nullish(),
         }))
         .query(async ({ input, ctx }) => {
-            const { page, pageSize, search } = input;
+            const { page, pageSize, search, status, agentId } = input;
             const durationExpr = sql<number>`
                 CASE 
                     WHEN ${meetings.endAt} IS NOT NULL AND ${meetings.startAt} IS NOT NULL 
@@ -56,7 +59,9 @@ export const meetingRouter = createTRPCRouter({
                 .where(
                     and(
                         eq(meetings.userId, ctx.auth.user.id),
-                        search ? ilike(meetings.name, `%${search}%`) : undefined
+                        search ? ilike(meetings.name, `%${search}%`) : undefined,
+                        status ? eq(meetings.status, status) : undefined,
+                        agentId ? eq(meetings.agentId, agentId) : undefined,
                     )
                 )
                 .orderBy(desc(meetings.createdAt), desc(meetings.id))
@@ -69,7 +74,9 @@ export const meetingRouter = createTRPCRouter({
                 .where(
                     and(
                         eq(meetings.userId, ctx.auth.user.id),
-                        search ? ilike(meetings.name, `%${search}%`) : undefined
+                        search ? ilike(meetings.name, `%${search}%`) : undefined,
+                        status ? eq(meetings.status, status) : undefined,
+                        agentId ? eq(meetings.agentId, agentId) : undefined,
                     )
                 )
             console.log("TOTAL COUNT:", total.count);
@@ -85,7 +92,8 @@ export const meetingRouter = createTRPCRouter({
                     .where(
                         and(
                             eq(meetings.id, input.id),
-                            eq(meetings.userId, ctx.auth.user.id)
+                            eq(meetings.userId, ctx.auth.user.id),
+
                         )
                     )
                     .returning();

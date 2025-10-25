@@ -24,6 +24,10 @@ export const Selection = ({
 }: SelectionProps) => {
   const [open, setOpen] = useState(false);
   const selectedOption = options.find((option) => option.value === value);
+  const correctOpen = (value: boolean) =>{
+    onSearch?.(""),
+    setOpen(value)
+  }
 
   return (
     <>
@@ -45,10 +49,10 @@ export const Selection = ({
       {/* Command Dialog (Rendered outside Button) */}
       <CommandCustomDialog
         open={open}
-        onOpenChange={setOpen}
+        onOpenChange={correctOpen}
         title="Choose your agent"
         description="Select an agent from the list"
-        shouldFilter={false}
+        shouldFilter={!onSearch}
       >
         <CommandInput placeholder="Search here..." onValueChange={onSearch} />
         <CommandList>
