@@ -57,6 +57,9 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
     trpc.meetings.update.mutationOptions({
       onSuccess: async () => {
         await queryClient.invalidateQueries(trpc.meetings.getMany.queryOptions({}));
+        if (initValues?.id){
+          await queryClient.invalidateQueries(trpc.meetings.getOne.queryOptions({id: initValues.id}))
+        }
         toast.success("Meeting updated successfully!");
         onSuccess?.();
       },
@@ -136,7 +139,7 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
                 }))} placeholder="Select an agent" onSearch={setSearchAgent} value={field.value} onSelect={field.onChange} />
               </FormControl>
               <FormDescription>
-                Didn't find an agent?
+                Didn&apos;t find an agent?
                 <Button type="button" variant="link" className="p-0 ml-1 text-primary hover:underline" onClick={() => setOpenAgentic(true)}>
                   Create a new one here!
                 </Button>
