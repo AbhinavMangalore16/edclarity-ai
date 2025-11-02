@@ -8,9 +8,30 @@ import { TRPCError } from "@trpc/server";
 import { DEFAULT_PAGE, DEFAULT_PAGESIZE, MAX_PAGESIZE, MIN_PAGESIZE } from "@/constants";
 import { meetingSchema, meetingUpdationSchema } from "../schemas";
 import { MeetingStatus } from "../types";
+import { comms } from "@/lib/comms";
+import { genAvatarURI } from "@/lib/avatargen";
 // import { TRPCError } from "@trpc/server";
 
 export const meetingRouter = createTRPCRouter({
+    generateUserToken: protectedProcedure.mutation(async({ctx})=>{
+        await comms.upsertUsers([{
+            id: ctx.auth.user.id,
+            name: ctx.auth.user.name,
+            role: "admin",
+            image: ctx.auth.user.image?? genAvatarURI({seed: ctx.auth.user.name, variant:"initials"})
+        }
+    ])
+    const sttToken = Math.floor(Date.now()/1000) - 60;
+    const expToken = Math.floor(Date.now()/1000) + 3600;
+    const userToken = comms.generateUserToken({
+        user_id: ctx.auth.user.id,
+        exp: expToken,
+        validity_in_seconds: sttToken,
+    })
+    return userToken;
+    })
+
+    ,
     create: protectedProcedure
         .input(meetingSchema)
         .mutation(async ({ input, ctx }) => {
@@ -19,6 +40,45 @@ export const meetingRouter = createTRPCRouter({
                     ...input,
                     userId: ctx.auth.user.id,
                 }).returning();
+
+            const meeting = comms.video.call("default", createdMeeting.id);
+            await meeting.create({
+                data:{
+                    created_by_id: ctx.auth.user.id,
+                    custom:{
+                        meetingId: createdMeeting.id,
+                        meetingName: createdMeeting.name
+                    },
+                    settings_override:{
+                        transcription:{
+                            language: "en",
+                            mode: "auto-on",
+                            closed_caption_mode: "auto-on"
+                        },
+                        recording:{
+                            mode: "auto-on",
+                            quality:"1080p"
+                        }
+                    }
+                }
+            })
+            const [agent] = await db.select()
+            .from(agents).where(eq(agents.id, createdMeeting.agentId))
+
+            if(!agent){
+                throw new TRPCError({code:"NOT_FOUND", message:"No agent found."})
+            }
+            await comms.upsertUsers([
+                {
+                    id: agent.id,
+                    name: agent.name,
+                    role: "user",
+                    image: genAvatarURI({
+                        seed: agent.name,
+                        variant: "Adventurer"
+                    })
+                }
+            ])
             return createdMeeting;
         })
     ,
