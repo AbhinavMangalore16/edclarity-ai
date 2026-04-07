@@ -8,180 +8,177 @@ import { TRPCError } from "@trpc/server";
 import { DEFAULT_PAGE, DEFAULT_PAGESIZE, MAX_PAGESIZE, MIN_PAGESIZE } from "@/constants";
 import { meetingSchema, meetingUpdationSchema } from "../schemas";
 import { MeetingStatus } from "../types";
-import { comms } from "@/lib/comms";
+import { streamComms } from "@/lib/comms";
 import { genAvatarURI } from "@/lib/avatargen";
 // import { TRPCError } from "@trpc/server";
 
 export const meetingRouter = createTRPCRouter({
-    generateUserToken: protectedProcedure.mutation(async({ctx})=>{
-        await comms.upsertUsers([{
-            id: ctx.auth.user.id,
-            name: ctx.auth.user.name,
-            role: "admin",
-            image: ctx.auth.user.image?? genAvatarURI({seed: ctx.auth.user.name, variant:"initials"})
-        }
+  generateToken: protectedProcedure.mutation(async ({ ctx }) => {
+    await streamComms.upsertUsers([{
+      id: ctx.auth.user.id,
+      name: ctx.auth.user.name,
+      role: "admin",
+      image: ctx.auth.user.image ?? genAvatarURI({ seed: ctx.auth.user.name, variant: "initials" })
+    }
     ])
-    const sttToken = Math.floor(Date.now()/1000) - 60;
-    const expToken = Math.floor(Date.now()/1000) + 3600;
-    const userToken = comms.generateUserToken({
-        user_id: ctx.auth.user.id,
-        exp: expToken,
-        validity_in_seconds: sttToken,
+    const now = Math.floor(Date.now() / 1000);
+    const expToken = now + 3600; // 1 hour expiry
+    const userToken = streamComms.generateUserToken({
+      user_id: ctx.auth.user.id,
+      iat: now,
+      exp: expToken,
     })
     return userToken;
+  })
+
+  ,
+  create: protectedProcedure
+    .input(meetingSchema)
+    .mutation(async ({ input, ctx }) => {
+      const [createdMeeting] = await db.insert(meetings)
+        .values({
+          ...input,
+          userId: ctx.auth.user.id,
+        }).returning();
+
+      const meeting = streamComms.video.call("default", createdMeeting.id);
+      await meeting.create({
+        data: {
+          created_by_id: ctx.auth.user.id,
+          custom: {
+            meetingId: createdMeeting.id,
+            meetingName: createdMeeting.name
+          },
+          settings_override: {
+            transcription: {
+              language: "en",
+              mode: "auto-on",
+              closed_caption_mode: "auto-on"
+            },
+            recording: {
+              mode: "auto-on",
+              quality: "1080p"
+            }
+          }
+        }
+      })
+      const [agent] = await db.select()
+        .from(agents).where(eq(agents.id, createdMeeting.agentId))
+
+      if (!agent) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "No agent found." })
+      }
+      await streamComms.upsertUsers([
+        {
+          id: agent.id,
+          name: agent.name,
+          role: "user",
+          image: "https://api.dicebear.com/9.x/bottts/webp"
+        }
+      ])
+      return createdMeeting;
     })
-
-    ,
-    create: protectedProcedure
-        .input(meetingSchema)
-        .mutation(async ({ input, ctx }) => {
-            const [createdMeeting] = await db.insert(meetings)
-                .values({
-                    ...input,
-                    userId: ctx.auth.user.id,
-                }).returning();
-
-            const meeting = comms.video.call("default", createdMeeting.id);
-            await meeting.create({
-                data:{
-                    created_by_id: ctx.auth.user.id,
-                    custom:{
-                        meetingId: createdMeeting.id,
-                        meetingName: createdMeeting.name
-                    },
-                    settings_override:{
-                        transcription:{
-                            language: "en",
-                            mode: "auto-on",
-                            closed_caption_mode: "auto-on"
-                        },
-                        recording:{
-                            mode: "auto-on",
-                            quality:"1080p"
-                        }
-                    }
-                }
-            })
-            const [agent] = await db.select()
-            .from(agents).where(eq(agents.id, createdMeeting.agentId))
-
-            if(!agent){
-                throw new TRPCError({code:"NOT_FOUND", message:"No agent found."})
-            }
-            await comms.upsertUsers([
-                {
-                    id: agent.id,
-                    name: agent.name,
-                    role: "user",
-                    image: genAvatarURI({
-                        seed: agent.name,
-                        variant: "Adventurer"
-                    })
-                }
-            ])
-            return createdMeeting;
-        })
-    ,
-    getOne: protectedProcedure
-        .input(z.object({ id: z.string() }))
-        .query(async ({ input, ctx }) => {
-             const durationExpr = sql<number>`
+  ,
+  getOne: protectedProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const durationExpr = sql<number>`
                 CASE 
                     WHEN ${meetings.endAt} IS NOT NULL AND ${meetings.startAt} IS NOT NULL 
                     THEN EXTRACT(EPOCH FROM (${meetings.endAt} - ${meetings.startAt})) 
                     ELSE NULL 
                 END
                 `.as("duration");
-            const [selectMeeting] = await db.select({ ...getTableColumns(meetings), agents: agents, duration: durationExpr })
-                .from(meetings)
-                .innerJoin(agents, eq(meetings.agentId, agents.id))
-                .where(
-                    and(
-                        eq(meetings.id, input.id),
-                        eq(meetings.userId, ctx.auth.user.id)
-                    )
-                )
-            if (!selectMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
-            return selectMeeting;
-        }),
-    getMany: protectedProcedure
-        .input(z.object({
-            page: z.number().default(DEFAULT_PAGE),
-            pageSize: z.number().min(MIN_PAGESIZE).max(MAX_PAGESIZE).default(DEFAULT_PAGESIZE),
-            search: z.string().nullish(),
-            agentId: z.string().nullish(),
-            status: z.enum([MeetingStatus.Scheduled, MeetingStatus.Active, MeetingStatus.Processing, MeetingStatus.Completed, MeetingStatus.Cancelled]).nullish(),
-        }))
-        .query(async ({ input, ctx }) => {
-            const { page, pageSize, search, status, agentId } = input;
-            const durationExpr = sql<number>`
-                CASE 
-                    WHEN ${meetings.endAt} IS NOT NULL AND ${meetings.startAt} IS NOT NULL 
-                    THEN EXTRACT(EPOCH FROM (${meetings.endAt} - ${meetings.startAt})) 
-                    ELSE NULL 
-                END
-                `.as("duration");
-            const data = await db.select({ ...getTableColumns(meetings), agent: agents, duration: durationExpr })
-                .from(meetings)
-                .innerJoin(agents, eq(meetings.agentId, agents.id))
-                .where(
-                    and(
-                        eq(meetings.userId, ctx.auth.user.id),
-                        search ? ilike(meetings.name, `%${search}%`) : undefined,
-                        status ? eq(meetings.status, status) : undefined,
-                        agentId ? eq(meetings.agentId, agentId) : undefined,
-                    )
-                )
-                .orderBy(desc(meetings.createdAt), desc(meetings.id))
-                .limit(pageSize)
-                .offset((page - 1) * pageSize);
-
-            const [total] = await db.select({ count: count() })
-                .from(meetings)
-                .innerJoin(agents, eq(meetings.agentId, agents.id))
-                .where(
-                    and(
-                        eq(meetings.userId, ctx.auth.user.id),
-                        search ? ilike(meetings.name, `%${search}%`) : undefined,
-                        status ? eq(meetings.status, status) : undefined,
-                        agentId ? eq(meetings.agentId, agentId) : undefined,
-                    )
-                )
-            console.log("TOTAL COUNT:", total.count);
-            const totalCount = Math.ceil(total.count / pageSize);
-            return { data, total: total.count, totalCount };
-        })
-    ,
-    update: protectedProcedure
-        .input(meetingUpdationSchema).mutation(
-            async ({ input, ctx }) => {
-                const [updateMeeting] = await db.update(meetings)
-                    .set(input)
-                    .where(
-                        and(
-                            eq(meetings.id, input.id),
-                            eq(meetings.userId, ctx.auth.user.id),
-
-                        )
-                    )
-                    .returning();
-                if (!updateMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
-            }
-        ),
-    remove: protectedProcedure
-        .input(z.object({ id: z.string() })).mutation(
-            async ({ input, ctx }) => {
-                const [removeMeeting] = await db.delete(meetings)
-                    .where(
-                        and(
-                            eq(meetings.id, input.id),
-                            eq(meetings.userId, ctx.auth.user.id),
-
-                        )
-                    )
-                    .returning();
-                if (!removeMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
-                return removeMeeting;
-            }
+      const [selectMeeting] = await db.select({ ...getTableColumns(meetings), agents: agents, duration: durationExpr })
+        .from(meetings)
+        .innerJoin(agents, eq(meetings.agentId, agents.id))
+        .where(
+          and(
+            eq(meetings.id, input.id),
+            eq(meetings.userId, ctx.auth.user.id)
+          )
         )
+      if (!selectMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
+      return selectMeeting;
+    }),
+  getMany: protectedProcedure
+    .input(z.object({
+      page: z.number().default(DEFAULT_PAGE),
+      pageSize: z.number().min(MIN_PAGESIZE).max(MAX_PAGESIZE).default(DEFAULT_PAGESIZE),
+      search: z.string().nullish(),
+      agentId: z.string().nullish(),
+      status: z.enum([MeetingStatus.Scheduled, MeetingStatus.Active, MeetingStatus.Processing, MeetingStatus.Completed, MeetingStatus.Cancelled]).nullish(),
+    }))
+    .query(async ({ input, ctx }) => {
+      const { page, pageSize, search, status, agentId } = input;
+      const durationExpr = sql<number>`
+                CASE 
+                    WHEN ${meetings.endAt} IS NOT NULL AND ${meetings.startAt} IS NOT NULL 
+                    THEN EXTRACT(EPOCH FROM (${meetings.endAt} - ${meetings.startAt})) 
+                    ELSE NULL 
+                END
+                `.as("duration");
+      const data = await db.select({ ...getTableColumns(meetings), agent: agents, duration: durationExpr })
+        .from(meetings)
+        .innerJoin(agents, eq(meetings.agentId, agents.id))
+        .where(
+          and(
+            eq(meetings.userId, ctx.auth.user.id),
+            search ? ilike(meetings.name, `%${search}%`) : undefined,
+            status ? eq(meetings.status, status) : undefined,
+            agentId ? eq(meetings.agentId, agentId) : undefined,
+          )
+        )
+        .orderBy(desc(meetings.createdAt), desc(meetings.id))
+        .limit(pageSize)
+        .offset((page - 1) * pageSize);
+
+      const [total] = await db.select({ count: count() })
+        .from(meetings)
+        .innerJoin(agents, eq(meetings.agentId, agents.id))
+        .where(
+          and(
+            eq(meetings.userId, ctx.auth.user.id),
+            search ? ilike(meetings.name, `%${search}%`) : undefined,
+            status ? eq(meetings.status, status) : undefined,
+            agentId ? eq(meetings.agentId, agentId) : undefined,
+          )
+        )
+      console.log("TOTAL COUNT:", total.count);
+      const totalCount = Math.ceil(total.count / pageSize);
+      return { data, total: total.count, totalCount };
+    })
+  ,
+  update: protectedProcedure
+    .input(meetingUpdationSchema).mutation(
+      async ({ input, ctx }) => {
+        const [updateMeeting] = await db.update(meetings)
+          .set(input)
+          .where(
+            and(
+              eq(meetings.id, input.id),
+              eq(meetings.userId, ctx.auth.user.id),
+
+            )
+          )
+          .returning();
+        if (!updateMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
+      }
+    ),
+  remove: protectedProcedure
+    .input(z.object({ id: z.string() })).mutation(
+      async ({ input, ctx }) => {
+        const [removeMeeting] = await db.delete(meetings)
+          .where(
+            and(
+              eq(meetings.id, input.id),
+              eq(meetings.userId, ctx.auth.user.id),
+
+            )
+          )
+          .returning();
+        if (!removeMeeting) { throw new TRPCError({ code: "NOT_FOUND", message: "Meeting NOT FOUND" }); }
+        return removeMeeting;
+      }
+    )
 })

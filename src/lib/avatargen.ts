@@ -9,11 +9,11 @@ interface AvatarGenProps{
 
 export const genAvatarURI = ({seed, variant}: AvatarGenProps) =>{
     let avatar;
-    if (variant=="Adventurer"){
+    if (variant==="Adventurer"){
         avatar = createAvatar(adventurer, {seed});
     }
     else{
-        avatar = createAvatar(initials, {seed, fontWeight: 500, fontSize:48})
+        avatar = createAvatar(initials, {seed, fontWeight: 500, fontSize:42})
     }
     return avatar.toDataUri();
 }

@@ -19,7 +19,7 @@ export const ScheduledMeeting = ({meetingId, onCancelMeeting, isCancelling}: Sch
                     Cancel Meeting
                 </Button>
                 <Button asChild className="w-full lg:w-auto" disabled={isCancelling}>
-                    <Link href={`/meet/${41521001}`}>
+                    <Link href={`/meet/${meetingId}`}>
                         <VideoIcon />
                         Start meeting
                     </Link>
