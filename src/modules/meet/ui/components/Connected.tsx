@@ -21,7 +21,6 @@ export const Connected = ({ meetingId, meetingName, userId, userName, userImage 
     const { mutateAsync: generateToken, error: tokenError } =
         useMutation(trpc.meetings.generateToken.mutationOptions());
 
-    // ✅ ALL HOOKS FIRST
     const [comms, setComms] = useState<StreamVideoClient>();
     const [meet, setMeet] = useState<Call>();
 
