@@ -1,7 +1,5 @@
-import { BanIcon, VideoIcon } from "lucide-react"
 import EmptyAgents from "../../../../components/extras/empty-state"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+
 
 
 export const CompletedMeeting = () => {
