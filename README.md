@@ -43,8 +43,6 @@ An AI-powered educational platform that revolutionizes learning through intellig
 - **Prettier** - Consistent code formatting
 - **TypeScript** - Static type checking
 
-## 🔮 Future Integrations (Roadmap)
-
 ### 🤖 AI-Powered Learning Features
 - **Custom AI Agents** - Specialized AI tutors for different subjects
 - **Real-time Doubt Solving** - Instant AI assistance during study sessions
@@ -216,7 +214,6 @@ Add an email to the notification list.
 - `409` - Email already exists
 - `400` - Invalid email format
 
-### Future API Endpoints
 
 #### AI Agents
 - `GET /api/agents` - List all AI agents
