@@ -133,7 +133,7 @@ function SignInForm({ form, pending, error, onSubmit, onSwitch, socialDisabled, 
                 <div className={isMobile ? "flex flex-row gap-2 w-full mb-4" : "flex flex-row gap-2 w-full mb-4"}>
                     <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.google}><FcGoogle /></Button>
                     {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.microsoft}><FaMicrosoft /></Button> */}
-                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={() => { authClient.signIn.social({ provider: "github", }) }}><FaGithub /></Button>
+                    <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={() => { authClient.signIn.social({ provider: "github", callbackURL: "/meetings" }) }}><FaGithub /></Button>
                     {/* <Button disabled={socialDisabled} variant="outline" className="flex-1 flex items-center justify-center gap-2 py-2" onClick={socialHandlers?.apple}><FaApple /></Button> */}
                 </div>
                 <div className="text-center">
@@ -262,7 +262,7 @@ export default function AuthView() {
                 setPending(false);
                 alert("Signed in successfully");
                 setEmail(""); setPassword("");
-                router.push("/")
+                router.push("/meetings")
             },
 
         });
@@ -280,7 +280,7 @@ export default function AuthView() {
                 setPending(false);
                 alert("Signed in successfully");
                 setEmail(""); setPassword("");
-                router.push("/")
+                router.push("/meetings")
             },
 
         });
@@ -288,7 +288,7 @@ export default function AuthView() {
     const handleSocial = (provider: 'github' | 'google') => {
         setError(null)
         setPending(true)
-        authClient.signIn.social({ provider: provider, callbackURL: "/" }, {
+        authClient.signIn.social({ provider: provider, callbackURL: "/meetings" }, {
             onError: ({ error }) => {
                 setPending(false);
                 setErrorS(error.message);
@@ -337,10 +337,10 @@ export default function AuthView() {
                                     socialDisabled={pending}
                                     isMobile={true}
                                     socialHandlers={{
-                                        google: () => authClient.signIn.social({ provider: "google" }),
-                                        github: () => authClient.signIn.social({ provider: "github" }),
-                                        microsoft: () => authClient.signIn.social({ provider: "microsoft" }),
-                                        apple: () => authClient.signIn.social({ provider: "apple" })
+                                        google: () => authClient.signIn.social({ provider: "google", callbackURL: "/meetings" }),
+                                        github: () => authClient.signIn.social({ provider: "github", callbackURL: "/meetings" }),
+                                        microsoft: () => authClient.signIn.social({ provider: "microsoft", callbackURL: "/meetings" }),
+                                        apple: () => authClient.signIn.social({ provider: "apple", callbackURL: "/meetings" })
                                     }}
                                 />
                             ) : (
@@ -355,8 +355,8 @@ export default function AuthView() {
                                     socialHandlers={{
                                         google: () => handleSocial('google'),
                                         github: () => handleSocial('github'),
-                                        microsoft: () => authClient.signIn.social({ provider: "microsoft" }),
-                                        apple: () => authClient.signIn.social({ provider: "apple" })
+                                        microsoft: () => authClient.signIn.social({ provider: "microsoft", callbackURL: "/meetings" }),
+                                        apple: () => authClient.signIn.social({ provider: "apple", callbackURL: "/meetings" })
                                     }}
                                 />
                             )}
@@ -443,7 +443,7 @@ export default function AuthView() {
                                             <Button variant={"outline"} type="button" className="w-full" onClick={() => handleSocial('google')}>
                                                 <FcGoogle /> Google
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", }) }}>
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", callbackURL: "/meetings" }) }}>
                                                 <FaGithub /> GitHub
                                             </Button>
                                             {/* <Button variant={"outline"} type="button" className="w-full">
@@ -557,7 +557,7 @@ export default function AuthView() {
                                             <Button variant={"outline"} type="button" className="w-full" onClick={() => handleSocial('google')}>
                                                 <FcGoogle /> Google
                                             </Button>
-                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", }) }}>
+                                            <Button variant={"outline"} type="button" className="w-full" onClick={() => { authClient.signIn.social({ provider: "github", callbackURL: "/meetings" }) }}>
                                                 <FaGithub /> Github
                                             </Button>
                                             {/* <Button variant={"outline"} type="button" className="w-full" >
