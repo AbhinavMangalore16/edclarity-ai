@@ -80,3 +80,29 @@ export const meetings = pgTable("meetings", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 })
+
+// Dummy tables to satisfy unused legacy Next.js backend files
+export const documents = pgTable("documents", { id: text("id") });
+export const documentChunks = pgTable("document_chunks", {
+  id: text("id"),
+  content: text("content"),
+  type: text("type"),
+  documentStructure: text("document_structure"),
+  embedding: text("embedding"),
+  userId: text("user_id"),
+});
+export const memoryItems = pgTable("memory_items", {
+  id: text("id"),
+  userId: text("user_id"),
+  lastAccessed: timestamp("last_accessed"),
+  concept: text("concept"),
+  errorPattern: text("error_pattern"),
+  confidenceLevel: text("confidence_level"),
+});
+export const messages = pgTable("messages", {
+  id: text("id"),
+  sessionId: text("session_id"),
+  role: text("role"),
+  content: text("content"),
+  createdAt: timestamp("created_at"),
+});

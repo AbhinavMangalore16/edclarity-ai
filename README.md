@@ -21,6 +21,11 @@ An AI-powered educational platform that revolutionizes learning through intellig
 - **Database Integration** - PostgreSQL with Drizzle ORM for type-safe queries
 - **Error Handling** - Proper HTTP status codes and user-friendly error messages
 
+### AI & Agentic Capabilities
+- **LibraAI (RAG Assistant)** - Advanced Retrieval-Augmented Generation with interactive 'Clarity Mode' and Recharts metrics tracking.
+- **EdTutors** - Specialized AI tutors and assistants integrated directly into the dashboard.
+- **Meeting Intelligence** - Automated transcription and summarization for your video meetings.
+
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -46,10 +51,11 @@ An AI-powered educational platform that revolutionizes learning through intellig
 ## 🔮 Future Integrations (Roadmap)
 
 ### 🤖 AI-Powered Learning Features
-- **Custom AI Agents** - Specialized AI tutors for different subjects
-- **Real-time Doubt Solving** - Instant AI assistance during study sessions
-- **Intelligent Q&A** - Context-aware AI that understands learning progress
-- **Gemma and Gemini Pro Integration** - Advanced language models for educational content and larger inclusivity
+- **Real-Time Token Streaming** - Implementing SSE for LibraAI to stream LLM responses for lower latency.
+- **Persistent Metric Tracking** - Storing and visualizing historical RAG evaluation metrics across sessions.
+- **Advanced Contextual Compression** - Integrating `ContextualCompressionRetriever` with LangGraph for highly condensed RAG retrieval.
+- **Multi-Agent Workflows** - Adding multi-agent orchestrations for complex educational tasks.
+- **Gemma and Gemini Pro Integration** - Advanced language models for educational content and larger inclusivity.
 
 ### 📞 Real-time Communication
 - **Stream Video SDK** - High-quality video calls for tutoring sessions
