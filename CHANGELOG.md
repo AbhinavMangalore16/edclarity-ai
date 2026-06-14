@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1-beta] - 2026-06-14
+
+### Architecture & Chores
+- **Monorepo Migration**: Officially migrated the `LibraRAG` FastAPI backend directly into the Next.js project structure under `src/modules/LibraRAG` for a unified development experience.
+- **Gitignore Expansion**: Significantly expanded `.gitignore` to properly exclude Python environments (`.venv`), `__pycache__`, and data science artifacts to support the new unified structure.
+- **UI Cleanup**: Removed the manual "Sync" button from the `ChatInterface` to streamline the chat actions.
+
+
+
 ## [1.1.0-beta] - 2026-06-14
 
 ### New Features

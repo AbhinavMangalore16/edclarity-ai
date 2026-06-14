@@ -3,7 +3,8 @@ from dotenv import load_dotenv
 load_dotenv()
 import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks, UploadFile, File, Form, Header
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Any, Dict
@@ -98,6 +99,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+data_dir_path = os.path.join(os.path.dirname(__file__), "..", "data")
+os.makedirs(data_dir_path, exist_ok=True)
+app.mount("/files", StaticFiles(directory=data_dir_path), name="files")
+
 class QueryRequest(BaseModel):
     query: str
     session_id: Optional[str] = None
@@ -116,14 +121,22 @@ def health_check():
     return {"status": "ok", "pipeline_ready": rag_pipeline is not None}
 
 @app.post("/api/chat", response_model=QueryResponse)
-def chat_endpoint(request: QueryRequest, db: Session = Depends(get_db)):
+def chat_endpoint(
+    request: QueryRequest, 
+    db: Session = Depends(get_db),
+    personalized: Optional[str] = Header(None),
+    user_id: Optional[str] = Header(None)
+):
     if not rag_pipeline:
         raise HTTPException(status_code=503, detail="Pipeline is not initialized yet.")
         
     try:
+        active_user_id = user_id if (personalized and personalized.lower() == "true") else None
+        
         result = rag_pipeline.run(
             user_query=request.query,
             session_id=request.session_id,
+            user_id=active_user_id,
             db_session=db,
             stream=request.stream,
             evaluate=True
@@ -151,8 +164,8 @@ def ingest_documents(background_tasks: BackgroundTasks):
     background_tasks.add_task(background_ingest_task, data_dir)
     return {"message": "Ingestion started in the background."}
 
-def background_ingest_single_file(file_path: str):
-    logger.info(f"Background ingestion task started for file: {file_path}")
+def background_ingest_single_file(file_path: str, user_id: str):
+    logger.info(f"Background ingestion task started for file: {file_path} (User: {user_id})")
     global rag_pipeline
     
     docs = []
@@ -170,6 +183,7 @@ def background_ingest_single_file(file_path: str):
             
         for doc in docs:
             doc.metadata["source_file"] = file_path
+            doc.metadata["user_id"] = user_id
             
     except Exception as e:
         logger.error(f"Error loading file {file_path}: {e}")
@@ -181,19 +195,25 @@ def background_ingest_single_file(file_path: str):
         logger.info("File ingestion complete.")
 
 @app.post("/api/upload")
-async def upload_file(background_tasks: BackgroundTasks, file: UploadFile = File(...)):
-    data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
-    os.makedirs(data_dir, exist_ok=True)
+async def upload_file(
+    background_tasks: BackgroundTasks, 
+    file: UploadFile = File(...),
+    user_id: str = Form(...)
+):
+    base_data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
+    user_data_dir = os.path.join(base_data_dir, user_id)
+    os.makedirs(user_data_dir, exist_ok=True)
     
-    file_path = os.path.join(data_dir, file.filename)
+    file_path = os.path.join(user_data_dir, file.filename)
     
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
         
-    background_tasks.add_task(background_ingest_single_file, file_path)
+    background_tasks.add_task(background_ingest_single_file, file_path, user_id)
     return {
-        "message": f"File {file.filename} uploaded successfully. Ingestion started in the background.",
-        "filename": file.filename
+        "message": f"File {file.filename} uploaded successfully for user {user_id}. Ingestion started in the background.",
+        "filename": file.filename,
+        "user_id": user_id
     }
 
 if __name__ == "__main__":

@@ -17,7 +17,6 @@ from generation.citations import build_context_with_citations
 from generation.answer_generator import generate_answer
 from generation.streaming import stream_answer, print_stream
 from evaluation.faithfulness import evaluate_faithfulness
-from evaluation.hallucination import detect_hallucination
 
 from sqlalchemy.orm import Session
 from models import ChatSession, ChatMessage, QueryLog
@@ -29,6 +28,7 @@ logger = logging.getLogger(__name__)
 class GraphState(TypedDict):
     user_query: str
     session_id: Optional[str]
+    user_id: Optional[str]
     db_session: Optional[Session]
     stream: bool
     evaluate: bool
@@ -108,9 +108,28 @@ class LibraPipeline:
         
         return workflow.compile()
 
-    def _retrieve_for_query(self, query: str, top_k: int) -> List[Document]:
-        dense_docs = self.dense_retriever.invoke(query)
-        bm25_docs = self.bm25_retriever.invoke(query)
+    def _retrieve_for_query(self, query: str, top_k: int, user_id: Optional[str] = None) -> List[Document]:
+        if user_id:
+            from langchain_classic.retrievers import ParentDocumentRetriever
+            retriever = ParentDocumentRetriever(
+                vectorstore=self.dense_retriever.vectorstore,
+                docstore=self.dense_retriever.docstore,
+                child_splitter=self.dense_retriever.child_splitter,
+                parent_splitter=self.dense_retriever.parent_splitter,
+                search_kwargs={"filter": {"user_id": user_id}}
+            )
+            dense_docs = retriever.invoke(query)
+            
+            original_k = getattr(self.bm25_retriever, 'k', 5)
+            self.bm25_retriever.k = 100
+            bm25_docs_raw = self.bm25_retriever.invoke(query)
+            self.bm25_retriever.k = original_k
+            
+            bm25_docs = [doc for doc in bm25_docs_raw if doc.metadata.get("user_id") == user_id][:top_k]
+        else:
+            dense_docs = self.dense_retriever.invoke(query)
+            bm25_docs = self.bm25_retriever.invoke(query)
+            
         merged_tuples = reciprocal_rank_fusion([dense_docs, bm25_docs])
         return [doc for doc, score in merged_tuples][:top_k]
 
@@ -176,7 +195,7 @@ Return ONLY the category name (simple, rag).
         expanded_queries = generate_multi_queries(state["rewritten_query"], self.llm, num_queries=state["multi_query_count"])
         all_retrieved_docs = []
         for q in expanded_queries:
-            docs = self._retrieve_for_query(q, top_k=state["top_k"])
+            docs = self._retrieve_for_query(q, top_k=state["top_k"], user_id=state.get("user_id"))
             all_retrieved_docs.extend(docs)
         perf["hybrid_retrieval"] = time.time() - t0
             
@@ -269,7 +288,7 @@ Answer:"""
         # Only evaluate if we used RAG context
         if state["evaluate"] and state.get("context_str") and state.get("route") != "simple":
             faithfulness_score = evaluate_faithfulness(state["rewritten_query"], state["context_str"], state["answer"], self.llm)
-            hallucination_score = detect_hallucination(state["rewritten_query"], state["context_str"], state["answer"], self.llm)
+            hallucination_score = max(0.0, 100.0 - faithfulness_score)
             eval_metrics = {
                 "faithfulness": faithfulness_score,
                 "hallucination": hallucination_score
@@ -309,6 +328,7 @@ Answer:"""
         stream: bool = False,
         evaluate: bool = True,
         session_id: Optional[str] = None,
+        user_id: Optional[str] = None,
         db_session: Optional[Session] = None
     ) -> Dict[str, Any]:
         """
@@ -319,6 +339,7 @@ Answer:"""
         initial_state = {
             "user_query": user_query,
             "session_id": session_id,
+            "user_id": user_id,
             "db_session": db_session,
             "stream": stream,
             "evaluate": evaluate,

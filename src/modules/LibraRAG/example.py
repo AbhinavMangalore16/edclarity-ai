@@ -66,7 +66,7 @@ def main():
     
     # 5. Interactive Query Loop
     print("\n" + "="*50)
-    print("Libra Online!")
+    print("Libra Pipeline Ready!")
     print("Type 'exit' or 'quit' to stop.")
     print("="*50 + "\n")
     

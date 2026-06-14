@@ -214,7 +214,7 @@ export const ChatInterface = () => {
             <BugPlay className="w-4 h-4" />
             Clarity Mode
           </Button>
-          <Button
+          {/* <Button
             variant="outline"
             size="sm"
             onClick={handleIngest}
@@ -223,7 +223,7 @@ export const ChatInterface = () => {
           >
             <Database className="w-4 h-4" />
             Sync
-          </Button>
+          </Button> */}
           <input
             type="file"
             ref={fileInputRef}
@@ -284,10 +284,10 @@ export const ChatInterface = () => {
                               components={{
                                 // Custom styling for links so they match your theme and open in a new tab
                                 a: ({ node, ...props }) => (
-                                  <a 
-                                    {...props} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer" 
+                                  <a
+                                    {...props}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
                                   />
                                 )
