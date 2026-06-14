@@ -12,7 +12,11 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { CheckCircle2 } from "lucide-react";
 
 const top = [
-
+    {
+        icon: ScanSearchIcon,
+        label: "EdClarity.ai",
+        href: "/LibraAI",
+    },
     {
         icon: VideoIcon,
         label: "Your Meetings",
@@ -23,11 +27,7 @@ const top = [
         label: "Your EdTutors",
         href: "/agentic",
     },
-    {
-        icon: ScanSearchIcon,
-        label: "EdClarity.ai",
-        href: "/LibraAI",
-    }
+
 ]
 
 const bottom = [
