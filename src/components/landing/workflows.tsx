@@ -48,7 +48,7 @@ export default function Workflows() {
                 </div>
                 {/* Image */}
                 <Image
-                  className="inline-flex"
+                  className="inline-flex max-w-full h-auto"
                   src="/images/workflow-01.png"
                   width={350}
                   height={288}
@@ -95,7 +95,7 @@ export default function Workflows() {
                 </div>
                 {/* Image */}
                 <Image
-                  className="inline-flex"
+                  className="inline-flex max-w-full h-auto"
                   src="/images/workflow-02.png"
                   width={350}
                   height={288}
@@ -142,7 +142,7 @@ export default function Workflows() {
                 </div>
                 {/* Image */}
                 <Image
-                  className="inline-flex"
+                  className="inline-flex max-w-full h-auto"
                   src="/images/workflow-03.png"
                   width={350}
                   height={288}

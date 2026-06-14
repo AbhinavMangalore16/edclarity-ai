@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { chatWithAgent, checkHealth, triggerIngestion } from "./apiService";
+import ReactMarkdown from 'react-markdown';
+import { chatWithAgent, checkHealth, triggerIngestion, uploadDocument } from "./apiService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, User, RefreshCw, FileText, Activity, AlertCircle, Database, ServerCog, BugPlay } from "lucide-react";
+import { Bot, User, RefreshCw, FileText, Activity, AlertCircle, Database, ServerCog, BugPlay, Upload } from "lucide-react";
 import RuixenQueryBox from "@/components/ui/ruixen-query-box";
 import { MetricsBoard } from "@/components/ui/metrics-board";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+import { authClient } from "@/lib/auth-client";
 
 interface Metrics {
   faithfulness: number;
@@ -36,11 +38,32 @@ export const ChatInterface = () => {
   const [healthChecking, setHealthChecking] = useState(true);
   const [ingesting, setIngesting] = useState(false);
   const [testMode, setTestMode] = useState(false);
+  const [userId, setUserId] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [uploadedFiles, setUploadedFiles] = useState<{ name: string, id: string }[]>([]);
+  const [isPersonalized, setIsPersonalized] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const { data: session } = authClient.useSession();
 
   useEffect(() => {
-    // Generate a random session ID on mount
+    // Generate a random session ID for the current chat session
     setSessionId(crypto.randomUUID());
+
+    // Resolve user ID: prefer authenticated user, fallback to persistent guest ID
+    if (session?.user?.id) {
+      setUserId(session.user.id);
+    } else {
+      const storedUserId = localStorage.getItem("libra_guest_user_id");
+      if (storedUserId) {
+        setUserId(storedUserId);
+      } else {
+        const newId = "guest_" + crypto.randomUUID().split("-")[0];
+        localStorage.setItem("libra_guest_user_id", newId);
+        setUserId(newId);
+      }
+    }
 
     // Check health
     const verifyHealth = async () => {
@@ -71,7 +94,7 @@ export const ChatInterface = () => {
     setLoading(true);
 
     try {
-      const data = await chatWithAgent(query, sessionId);
+      const data = await chatWithAgent(query, sessionId, userId, isPersonalized);
       const agentMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "agent",
@@ -108,6 +131,47 @@ export const ChatInterface = () => {
     }
   };
 
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !userId) return;
+
+    setUploading(true);
+
+    const userMessage: ChatMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: `📎 Uploading document: ${file.name}...`,
+    };
+    setMessages((prev) => [...prev, userMessage]);
+
+    try {
+      await uploadDocument(file, userId);
+
+      const agentMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "agent",
+        content: `I've received your document **${file.name}**. The ingestion process has started in the background. You can now ask me questions about it!`,
+      };
+      setMessages((prev) => [...prev, agentMessage]);
+
+      setUploadedFiles((prev) => [...prev, { name: file.name, id: crypto.randomUUID() }]);
+
+    } catch (error) {
+      console.error("Upload Error:", error);
+      const agentMessage: ChatMessage = {
+        id: crypto.randomUUID(),
+        role: "agent",
+        content: `Sorry, there was an error uploading your document **${file.name}**. Please try again.`,
+      };
+      setMessages((prev) => [...prev, agentMessage]);
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <div className={`flex flex-col flex-1 h-full w-full mx-auto space-y-4 p-4 md:p-8 min-h-0 ${testMode ? 'max-w-[1600px]' : 'max-w-5xl'}`}>
       {/* Header section */}
@@ -136,9 +200,9 @@ export const ChatInterface = () => {
             {healthChecking ? (
               <><RefreshCw className="w-4 h-4 animate-spin text-gray-500" /> Checking Status...</>
             ) : systemReady ? (
-              <><div className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Pipeline Ready</>
+              <><div className="w-2.5 h-2.5 rounded-full bg-purple-500" /> Online</>
             ) : (
-              <><AlertCircle className="w-4 h-4 text-red-500" /> System Offline</>
+              <><AlertCircle className="w-4 h-4 text-red-500" />Offline</>
             )}
           </div>
           <Button
@@ -159,6 +223,23 @@ export const ChatInterface = () => {
           >
             <Database className="w-4 h-4" />
             Sync
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+            accept=".pdf,.txt,.md,.csv"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={uploading || !systemReady}
+            className="flex items-center gap-2 border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-purple-700 dark:text-purple-300"
+          >
+            {uploading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+            Upload
           </Button>
         </div>
       </div>
@@ -197,7 +278,27 @@ export const ChatInterface = () => {
                           : "bg-purple-50/50 dark:bg-zinc-900 text-gray-800 dark:text-gray-200 rounded-tl-sm border border-purple-100 dark:border-zinc-800 shadow-sm"
                           }`}
                       >
-                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        {msg.role === "agent" ? (
+                          <div className="whitespace-pre-wrap leading-relaxed">
+                            <ReactMarkdown
+                              components={{
+                                // Custom styling for links so they match your theme and open in a new tab
+                                a: ({ node, ...props }) => (
+                                  <a 
+                                    {...props} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer" 
+                                    className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
+                                  />
+                                )
+                              }}
+                            >
+                              {msg.content}
+                            </ReactMarkdown>
+                          </div>
+                        ) : (
+                          <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        )}
                       </div>
 
                       {/* Metrics Display */}
@@ -245,11 +346,23 @@ export const ChatInterface = () => {
 
           {/* Input Area */}
           <div className="p-4 md:p-6 bg-gray-50/50 dark:bg-zinc-900/30 border-t border-purple-100 dark:border-purple-900/30">
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto flex flex-col gap-3">
+              {uploadedFiles.length > 0 && (
+                <div className="flex flex-wrap gap-2 px-2">
+                  {uploadedFiles.map((f) => (
+                    <div key={f.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-800">
+                      <FileText className="w-3.5 h-3.5" />
+                      {f.name}
+                    </div>
+                  ))}
+                </div>
+              )}
               <RuixenQueryBox
                 onSubmit={handleSend}
                 disabled={loading || !systemReady}
                 placeholder={systemReady ? "Ask your agent something..." : "Waiting for system to be ready..."}
+                isPersonalized={isPersonalized}
+                onTogglePersonalized={() => setIsPersonalized(!isPersonalized)}
               />
             </div>
           </div>
@@ -265,10 +378,11 @@ export const ChatInterface = () => {
         </div>
 
         {/* Mobile/Tablet Metrics Board (Clarity Mode) via Sheet */}
-        <Sheet open={testMode} onOpenChange={setTestMode}>
-          <SheetContent side="bottom" className="h-[80vh] sm:h-auto sm:side-right sm:w-[400px] p-0 bg-transparent border-none shadow-none lg:hidden flex flex-col justify-end sm:justify-start">
+        <Sheet open={testMode} onOpenChange={setTestMode} modal={false}>
+          <SheetContent side="bottom" hideOverlay className="h-[65vh] sm:h-auto sm:side-right sm:w-[400px] p-0 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-xl border-t border-purple-200 dark:border-purple-800 rounded-t-3xl shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.3)] lg:hidden flex flex-col">
             <SheetTitle className="sr-only">Clarity Mode Metrics</SheetTitle>
-            <div className="h-full max-h-full py-4 px-2 sm:py-6 sm:pr-6 sm:pl-0 flex overflow-hidden">
+            <div className="w-12 h-1.5 bg-gray-300 dark:bg-zinc-700 rounded-full mx-auto mt-3 mb-1" />
+            <div className="flex-1 min-h-0 py-2 px-4 sm:p-6 overflow-hidden">
               <MetricsBoard messages={messages} />
             </div>
           </SheetContent>

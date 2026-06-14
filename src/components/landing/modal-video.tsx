@@ -56,7 +56,7 @@ export default function ModalVideo({
       >
         <figure className="relative overflow-hidden rounded-2xl before:absolute before:inset-0 before:-z-10 before:bg-linear-to-br before:from-gray-900 before:via-indigo-500/20 before:to-gray-900">
           <Image
-            className="opacity-50 grayscale"
+            className="opacity-50 grayscale w-full h-auto object-cover"
             src={thumb}
             width={thumbWidth}
             height={thumbHeight}
@@ -113,7 +113,7 @@ export default function ModalVideo({
           className="fixed inset-0 z-99999 bg-black/70 transition-opacity duration-300 ease-out data-closed:opacity-0"
         />
         <div className="fixed inset-0 z-99999 flex px-4 py-6 sm:px-6">
-          <div className="mx-auto flex h-full max-w-6xl items-center">
+          <div className="mx-auto flex h-full w-full max-w-6xl items-center justify-center">
             <DialogPanel
               transition
               className="aspect-video max-h-full w-full overflow-hidden rounded-2xl bg-black shadow-2xl duration-300 ease-out data-closed:scale-95 data-closed:opacity-0"
@@ -122,6 +122,7 @@ export default function ModalVideo({
                 ref={videoRef}
                 width={videoWidth}
                 height={videoHeight}
+                className="w-full h-auto"
                 loop
                 controls
               >

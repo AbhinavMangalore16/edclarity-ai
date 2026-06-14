@@ -1,27 +1,67 @@
 "use client";
 
-import { Mic, SendHorizonal, Upload } from "lucide-react";
-import { useState, useRef } from "react";
+import { Mic, SendHorizonal, User, Globe } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { useAutoResizeTextarea } from "@/hooks/use-auto-resize-textarea";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface RuixenQueryBoxProps {
   onSubmit: (query: string) => void;
   disabled?: boolean;
   placeholder?: string;
+  isPersonalized: boolean;
+  onTogglePersonalized: () => void;
 }
 
-export default function RuixenQueryBox({ onSubmit, disabled, placeholder = "Ask anything..." }: RuixenQueryBoxProps) {
+export default function RuixenQueryBox({ onSubmit, disabled, placeholder = "Ask anything...", isPersonalized, onTogglePersonalized }: RuixenQueryBoxProps) {
   const { textareaRef, adjustHeight } = useAutoResizeTextarea({
     minHeight: 56,
     maxHeight: 220,
   });
 
   const [inputValue, setInputValue] = useState("");
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const prevTextRef = useRef("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+
+        recognition.onstart = () => setIsRecording(true);
+        recognition.onend = () => setIsRecording(false);
+        recognition.onresult = (event: any) => {
+          let currentTranscript = "";
+          for (let i = 0; i < event.results.length; i++) {
+            currentTranscript += event.results[i][0].transcript;
+          }
+          const separator = prevTextRef.current && currentTranscript ? " " : "";
+          setInputValue(prevTextRef.current + separator + currentTranscript);
+          adjustHeight();
+        };
+        recognitionRef.current = recognition;
+      }
+    }
+  }, [adjustHeight]);
+
+  const toggleRecording = () => {
+    if (!recognitionRef.current) {
+      alert("Voice recognition is not supported in this browser.");
+      return;
+    }
+    if (isRecording) {
+      recognitionRef.current.stop();
+    } else {
+      prevTextRef.current = inputValue;
+      recognitionRef.current.start();
+    }
+  };
 
   const handleSend = () => {
     if (!inputValue.trim() || disabled) return;
@@ -30,18 +70,13 @@ export default function RuixenQueryBox({ onSubmit, disabled, placeholder = "Ask 
     adjustHeight(true);
   };
 
-  const handleFileUpload = (files: FileList | null) => {
-    if (!files) return;
-    console.log("Uploaded files:", files);
-  };
-
   return (
     <div className="w-full">
       <div
         className="relative w-full mx-auto bg-white rounded-2xl shadow-sm overflow-hidden border border-purple-200 dark:border-purple-900/50"
         style={{
           backgroundImage:
-            "url('https://pub-940ccf6255b54fa799a9b01050e6c227.r2.dev/ruixen_chat_gradient.png')",
+            "url('/grads/EdClarity-chat-gradient.png')",
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
@@ -75,39 +110,51 @@ export default function RuixenQueryBox({ onSubmit, disabled, placeholder = "Ask 
           <button
             type="button"
             disabled={disabled}
-            className="p-2 rounded-full bg-black/10 hover:bg-black/20 text-white transition-colors disabled:opacity-50"
+            onClick={toggleRecording}
+            className={cn(
+              "p-2 rounded-full transition-colors disabled:opacity-50",
+              isRecording 
+                ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" 
+                : "bg-black/10 hover:bg-black/20 text-white"
+            )}
           >
             <Mic className="w-4 h-4" />
           </button>
 
-          {/* File Upload Popover */}
-          <Popover>
-            <PopoverTrigger asChild>
-              <button
-                type="button"
-                disabled={disabled}
-                className="p-2 rounded-full bg-black/10 hover:bg-black/20 text-white transition-colors disabled:opacity-50"
-              >
-                <Upload className="w-4 h-4" />
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-60 p-4">
-              <p className="text-sm mb-2">Upload files:</p>
-              <input
-                type="file"
-                multiple
-                ref={fileInputRef}
-                onChange={(e) => handleFileUpload(e.target.files)}
-                className="w-full border border-gray-300 rounded p-1 text-sm"
-              />
-              <Button
-                className="mt-2 w-full"
-                onClick={() => fileInputRef.current?.click()}
-              >
-                Choose Files
-              </Button>
-            </PopoverContent>
-          </Popover>
+          {/* Personalized Toggle Button */}
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  disabled={disabled}
+                  onClick={onTogglePersonalized}
+                  className={cn(
+                    "p-2 rounded-full transition-colors disabled:opacity-50 flex items-center gap-1.5 px-3 text-sm font-medium",
+                    isPersonalized 
+                      ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                      : "bg-black/10 hover:bg-black/20 text-white"
+                  )}
+                >
+                  {isPersonalized ? <User className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+                  <span className="hidden sm:inline">{isPersonalized ? "Personalized" : "Global"}</span>
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs space-y-1 text-sm">
+                {isPersonalized ? (
+                  <>
+                    <p>Using your uploaded study materials and learning profile.</p>
+                    <p className="text-xs text-[#F6E3E7]">Click to switch to Global search.</p>
+                  </>
+                ) : (
+                  <>
+                    <p>Search across all available knowledge.</p>
+                    <p className="text-xs text-[#F6E3E7]">Click to switch to Personalized mode and use your study materials.</p>
+                  </>
+                )}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
           <button
             type="button"

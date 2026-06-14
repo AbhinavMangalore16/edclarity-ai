@@ -39,18 +39,18 @@ interface MetricsBoardProps {
 const evalChartConfig = {
   faithfulness: {
     label: "Faithfulness (%)",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-2)",
   },
   hallucination: {
     label: "Hallucination (%)",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
 };
 
 const perfChartConfig = {
   time: {
     label: "Time (s)",
-    color: "hsl(var(--chart-3))",
+    color: "var(--chart-3)",
   },
 };
 
@@ -120,8 +120,8 @@ export function MetricsBoard({ messages }: MetricsBoardProps) {
                 <YAxis tickLine={false} axisLine={false} tickMargin={8} domain={[0, 100]} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Line type="monotone" dataKey="faithfulness" stroke="hsl(var(--chart-2))" strokeWidth={2} activeDot={{ r: 6 }} dot={{ r: 4 }} />
-                <Line type="monotone" dataKey="hallucination" stroke="hsl(var(--chart-1))" strokeWidth={2} activeDot={{ r: 6 }} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="faithfulness" stroke="var(--color-faithfulness)" strokeWidth={2} activeDot={{ r: 6 }} dot={{ r: 4 }} />
+                <Line type="monotone" dataKey="hallucination" stroke="var(--color-hallucination)" strokeWidth={2} activeDot={{ r: 6 }} dot={{ r: 4 }} />
               </LineChart>
             </ChartContainer>
           </div>
@@ -135,7 +135,7 @@ export function MetricsBoard({ messages }: MetricsBoardProps) {
                 <XAxis type="number" tickLine={false} axisLine={false} tickMargin={8} />
                 <YAxis dataKey="stage" type="category" tickLine={false} axisLine={false} tickMargin={8} width={80} />
                 <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="time" fill="hsl(var(--chart-3))" radius={[0, 4, 4, 0]} barSize={20} />
+                <Bar dataKey="time" fill="var(--color-time)" radius={[0, 4, 4, 0]} barSize={20} />
               </BarChart>
             </ChartContainer>
           </div>

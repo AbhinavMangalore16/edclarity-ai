@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0-beta] - 2026-06-14
+
+### New Features
+
+- **LibraAI Enhancements**
+  - Voice-to-text dictation integrated directly into the chat interface for hands-free queries.
+  - Global vs. Personalized knowledge toggle, allowing users to restrict RAG retrieval strictly to their own uploaded study materials.
+  - Full Markdown rendering with intelligent citation rewriting. Local PDF citations now beautifully hyperlink and open securely via the backend API.
+- **Identity & Persistence**
+  - Seamless fallback to persistent local guest IDs, ensuring uploaded documents remain securely accessible across sessions for unauthenticated users.
+
+### UI/UX & Bug Fixes
+- Fixed responsive scaling of hero videos and image components on mobile.
+- Recharts evaluation graphs updated to correctly render lines using modern Tailwind CSS v4 variables.
+- Clarity Mode mobile drawer now supports active background interactions without darkening the screen.
+- Back-to-home navigation added seamlessly to the authentication views.
+
+
 ## [1.0.0-beta] - 2026-06-13
 
 ### New Features

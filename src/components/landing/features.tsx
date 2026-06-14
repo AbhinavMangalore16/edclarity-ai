@@ -48,7 +48,7 @@ export default function Features() {
           </div>
           <div className="flex justify-center pb-4 md:pb-12" data-aos="fade-up">
             <Image
-              className="max-w-none"
+              className="max-w-full h-auto"
               src="/images/features.png"
               width={1104}
               height={384}

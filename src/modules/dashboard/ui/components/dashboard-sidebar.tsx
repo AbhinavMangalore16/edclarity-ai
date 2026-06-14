@@ -3,7 +3,7 @@
 import { Separator } from "@/components/ui/separator";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { BotMessageSquareIcon, DiamondPlusIcon, HeadsetIcon, MegaphoneIcon, VideoIcon, SearchXIcon } from "lucide-react";
+import { BotMessageSquareIcon, DiamondPlusIcon, HeadsetIcon, MegaphoneIcon, VideoIcon, ScanSearchIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,7 +24,7 @@ const top = [
         href: "/agentic",
     },
     {
-        icon: SearchXIcon,
+        icon: ScanSearchIcon,
         label: "EdClarity.ai",
         href: "/LibraAI",
     }

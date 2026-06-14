@@ -7,50 +7,42 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const changelog = [
   {
-    title: "LibraAI (RAG Assistant)",
-    description: "Our intelligent Retrieval-Augmented Generation agent. Chat with study material seamlessly.",
+    title: "Voice Dictation & Smart Citations",
+    description: "Speak directly to LibraAI and view beautifully formatted Markdown answers.",
     icon: SparklesIcon,
     highlights: [
-      "Advanced hybrid retrieval for high accuracy",
-      "Interactive 'Clarity Mode' with real-time performance telemetry",
-      "Per-query Faithfulness and Hallucination scoring"
+      "Web Speech API integration for hands-free voice-to-text queries",
+      "Full Markdown support in chat bubbles for lists, bold text, and code",
+      "PDF source citations now perfectly hyperlink and open directly from the backend"
     ]
   },
   {
-    title: "Meeting Intelligence",
-    description: "Transform how you manage meetings with automated transcription and insights.",
-    icon: VideoIcon,
-    highlights: [
-      "Automated video meeting transcription",
-      "AI-powered meeting summarization and action items extraction"
-    ]
-  },
-  {
-    title: "EdTutors Integration",
-    description: "Customized AI agents to assist with specific educational and administrative workflows.",
-    icon: BotMessageSquareIcon,
-    highlights: [
-      "Deploy specialized agents for distinct tasks",
-      "Seamless integration with your institutional knowledge base"
-    ]
-  },
-  {
-    title: "Official Documentation & Manual",
-    description: "Comprehensive guides to help you get the most out of EdClarity.ai.",
-    icon: BookOpenIcon,
-    highlights: [
-      "Complete user manual for all platform features",
-      "Developer documentation and API references"
-    ]
-  },
-  {
-    title: "Redesigned Dashboard UI",
-    description: "A fresh, modern, and highly responsive user interface.",
+    title: "Personalized Knowledge Space",
+    description: "Toggle between global knowledge and your specific uploaded files.",
     icon: FileTextIcon,
     highlights: [
-      "Glassmorphic design elements and cohesive branding",
-      "Improved mobile and tablet responsiveness",
-      "Unified dark mode support"
+      "New Global vs Personalized toggle in the query box",
+      "Persistent guest IDs ensure your uploaded documents are retained across sessions",
+      "Backend securely partitions RAG vector space per user"
+    ]
+  },
+  {
+    title: "Mobile Responsivity & Telemetry",
+    description: "Extensive polishing for mobile users and dashboard graphs.",
+    icon: BotMessageSquareIcon,
+    highlights: [
+      "Clarity Mode drawer now allows full background interaction on mobile",
+      "Evaluation graphs fixed to support new Tailwind CSS v4 variables",
+      "Video modal and landing page assets perfectly adhere to mobile screen bounds"
+    ]
+  },
+  {
+    title: "LibraAI (RAG Assistant)",
+    description: "Our core intelligent Retrieval-Augmented Generation agent.",
+    icon: BookOpenIcon,
+    highlights: [
+      "Advanced hybrid retrieval for high accuracy",
+      "Interactive 'Clarity Mode' with real-time performance telemetry"
     ]
   }
 ];
@@ -75,10 +67,10 @@ export default function AnnouncementsPage() {
           <div className="space-y-1">
             <CardTitle className="text-2xl flex items-center gap-2">
               <RocketIcon className="w-6 h-6 text-purple-600" />
-              EdClarity.ai Version 1.0.0-beta
+              EdClarity.ai Version 1.1.0-beta
             </CardTitle>
             <CardDescription className="text-base">
-              The foundational beta release introducing our core AI platform capabilities.
+              The latest major update introducing Voice Dictation, Personalized RAG, and extensive mobile polishing.
             </CardDescription>
           </div>
           <Badge className="bg-purple-600 hover:bg-purple-700 text-white text-sm px-3 py-1">

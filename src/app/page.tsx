@@ -45,7 +45,7 @@ const Page = () => {
 			<div className="w-full">
 				<motion.section
 					style={{ backgroundColor: "#020617", backgroundImage }}
-					className="relative grid min-h-screen place-content-center overflow-hidden bg-[#020617] px-4 py-24 text-slate-100"
+					className="relative grid min-h-screen place-content-center overflow-hidden bg-[#020617] px-4 pt-32 pb-20 sm:py-24 text-slate-100"
 				>
 					<div className="pointer-events-none absolute inset-x-0 top-6 z-20 flex justify-center px-4">
 						<nav className="pointer-events-auto w-full max-w-5xl rounded-2xl border border-white/20 bg-white/10 px-4 py-3 shadow-[0_20px_50px_rgba(2,6,23,0.45)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-white/30 hover:bg-white/14 sm:px-6">
@@ -62,7 +62,7 @@ const Page = () => {
 											alt="EdClarity logo"
 										/>
 									</span>
-									<span className="font-sora text-base font-semibold tracking-tight text-white transition-colors group-hover:text-cyan-200">
+									<span className="hidden sm:inline font-sora text-base font-semibold tracking-tight text-white transition-colors group-hover:text-cyan-200">
 										EdClarity.ai
 									</span>
 								</Link>
@@ -80,7 +80,7 @@ const Page = () => {
 					</div>
 
 					<div className="relative z-10 flex flex-col items-center">
-						<h1 className="max-w-3xl bg-gradient-to-br from-white via-slate-100 to-slate-400 bg-clip-text text-center text-3xl font-semibold leading-tight text-transparent sm:text-5xl md:text-7xl">
+						<h1 className="max-w-3xl bg-gradient-to-br from-white via-slate-100 to-slate-400 bg-clip-text text-center text-4xl font-semibold leading-tight text-transparent sm:text-5xl md:text-7xl">
 							AI Learning Clarity for Every Student
 						</h1>
 
