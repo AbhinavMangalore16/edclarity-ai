@@ -1,4 +1,4 @@
-const BASE_URL = "https://overkind-phrenologic-delilah.ngrok-free.dev";
+export const BASE_URL = "https://overkind-phrenologic-delilah.ngrok-free.dev";
 
 export const chatWithAgent = async (query: string, sessionId: string, userId: string, isPersonalized: boolean) => {
   const response = await fetch(`${BASE_URL}/api/chat`, {

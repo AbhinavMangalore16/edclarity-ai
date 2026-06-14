@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
-import { chatWithAgent, checkHealth, triggerIngestion, uploadDocument } from "./apiService";
+import { chatWithAgent, checkHealth, triggerIngestion, uploadDocument, BASE_URL } from "./apiService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -283,14 +283,27 @@ export const ChatInterface = () => {
                             <ReactMarkdown
                               components={{
                                 // Custom styling for links so they match your theme and open in a new tab
-                                a: ({ node, ...props }) => (
+                                a: ({ node, ...props }) => {
+                                let href = props.href || "";
+                                
+                                // Intercept backend local links and proxy them
+                                if (href.startsWith("http://localhost:8000")) {
+                                  const path = href.replace("http://localhost:8000", "");
+                                  href = `/api/proxy-document?path=${encodeURIComponent(path)}`;
+                                } else if (href.startsWith("/files/")) {
+                                  href = `/api/proxy-document?path=${encodeURIComponent(href)}`;
+                                }
+                                
+                                return (
                                   <a
                                     {...props}
+                                    href={href}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
                                   />
-                                )
+                                );
+                              }
                               }}
                             >
                               {msg.content}
