@@ -18,6 +18,8 @@ import {
     FieldLabel,
     FieldContent,
 } from "@/components/ui/field";
+import { AGENTS_PRESETS } from "@/config/presets";
+import { PresetSelector } from "@/components/extras/preset-selector";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -25,6 +27,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { toast } from "sonner";
 import Image from "next/image";
 import { Progress } from "../ui/progress";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 
 interface AgenticFormProps {
@@ -40,6 +43,8 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
     const [step, setStep] = useState(1);
     const [fileUploading, setFileUploading] = useState(false);
     const [avatar, setAvatar] = useState<string | null>(null);
+    const [selectedPreset, setSelectedPreset] = useState<string>("");
+    const proModal = useProModal();
 
 
     const isEdit = !!initValues?.id;
@@ -102,7 +107,12 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
             onSuccess?.(data.id);
         },
         onError: (error) => {
-            toast.error(error.message);
+            if (error.message === "LIMIT_AGENTS") {
+                proModal.onOpen("agents");
+                // Optionally cancel out of the form dialog if needed, or leave it open
+            } else {
+                toast.error(error.message);
+            }
         },
     }));
     const updateAgent = useMutation(trpc.agents.update.mutationOptions({
@@ -214,10 +224,29 @@ export const AgenticForm = ({ onSuccess, onCancel, initValues }: AgenticFormProp
                             <Field>
                                 <FieldLabel>Name</FieldLabel>
                                 <FieldContent>
-                                    <Input {...form.register("name")} placeholder="Agent name" />
+                                    <Input {...form.register("name")} placeholder="e.g. Alex, CodeBot" />
                                     {form.formState.errors.name && (
                                         <span className="text-red-500 text-sm mt-1">{form.formState.errors.name.message}</span>
                                     )}
+                                </FieldContent>
+                            </Field>
+
+                            <Field>
+                                <FieldLabel>Agent Persona</FieldLabel>
+                                <FieldContent>
+                                    <PresetSelector
+                                        categories={AGENTS_PRESETS}
+                                        selectedValue={selectedPreset}
+                                        onSelect={(value, instructions) => {
+                                            setSelectedPreset(value);
+                                            if (instructions) {
+                                                form.setValue("instructions", instructions);
+                                            }
+                                            if (!form.getValues("name")) {
+                                                form.setValue("name", value, { shouldValidate: true });
+                                            }
+                                        }}
+                                    />
                                 </FieldContent>
                             </Field>
 

@@ -15,6 +15,34 @@
       "when": 1761163403533,
       "tag": "0001_wise_kingpin",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1782767357043,
+      "tag": "0002_nice_blue_marvel",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1782944379668,
+      "tag": "0003_lazy_the_phantom",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1784297076644,
+      "tag": "0004_robust_proudstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792340686620,
+      "tag": "0005_mixed_enchantress",
+      "breakpoints": true
     }
   ]
 }

@@ -1,319 +1,93 @@
-# EdClarity.ai
+# EdClarity.ai — v2.0.0 (Olympus Release)
 
-An AI-powered educational platform that revolutionizes learning through intelligent AI agents, real-time doubt-solving sessions, and personalized learning experiences. Built with Next.js, TypeScript, and cutting-edge state-of-the-art AI technologies.
-
-## 🚀 Current Features
-
-### Authentication & User Management
-- **Secure Authentication** - Email/password and social login (Google, Microsoft, GitHub, Apple)
-- **Responsive Auth UI** - Beautiful, mobile-optimized authentication forms
-- **Session Management** - Persistent user sessions with secure logout
-- **Form Validation** - Zod schema validation with comprehensive error handling
-
-### Landing Page & User Acquisition
-- **Coming Soon Experience** - Animated typing effect with engaging user interface
-- **Email Collection System** - Users can subscribe to get notified when the platform launches
-- **Duplicate Prevention** - Smart email validation prevents duplicate submissions
-- **Responsive Design** - Optimized for all devices (iPhone SE, Samsung S8+, Desktop)
-
-### Backend Infrastructure
-- **Notification API** - RESTful API to manage email subscriptions
-- **Database Integration** - PostgreSQL with Drizzle ORM for type-safe queries
-- **Error Handling** - Proper HTTP status codes and user-friendly error messages
-
-### AI & Agentic Capabilities
-- **LibraAI (RAG Assistant)** - Advanced Retrieval-Augmented Generation with interactive 'Clarity Mode' and Recharts metrics tracking.
-- **EdTutors** - Specialized AI tutors and assistants integrated directly into the dashboard.
-- **Meeting Intelligence** - Automated transcription and summarization for your video meetings.
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **Next.js 15** - Latest React framework with App Router
-- **React 19** - Cutting-edge React features
-- **TypeScript** - Type-safe JavaScript development
-- **Tailwind CSS v4** - Latest utility-first CSS framework
-- **Shadcn/ui** - Modern component library
-- **React Hook Form** - Performant form state management
-- **Zod** - Schema validation and type inference
-
-### Backend & Database
-- **Next.js API Routes** - Serverless API endpoints
-- **Drizzle ORM** - Type-safe database queries
-- **PostgreSQL (Neon)** - Cloud-native database
-- **Auth.js (Better Auth)** - Modern authentication framework
-
-### Development & Quality
-- **ESLint** - Code linting and quality enforcement
-- **Prettier** - Consistent code formatting
-- **TypeScript** - Static type checking
-
-### 🤖 AI-Powered Learning Features
-- **Real-Time Token Streaming** - Implementing SSE for LibraAI to stream LLM responses for lower latency.
-- **Persistent Metric Tracking** - Storing and visualizing historical RAG evaluation metrics across sessions.
-- **Advanced Contextual Compression** - Integrating `ContextualCompressionRetriever` with LangGraph for highly condensed RAG retrieval.
-- **Multi-Agent Workflows** - Adding multi-agent orchestrations for complex educational tasks.
-- **Gemma and Gemini Pro Integration** - Advanced language models for educational content and larger inclusivity.
-
-### 📞 Real-time Communication
-- **Stream Video SDK** - High-quality video calls for tutoring sessions
-- **Stream Chat SDK** - Real-time messaging between students and AI agents
-- **Live Sessions** - Interactive learning sessions with AI tutors
-- **Screen Sharing** - Collaborative problem-solving capabilities
-
-### 📝 Learning Analytics & Content
-- **Session Summaries** - AI-generated summaries of learning sessions
-- **Transcript Generation** - Automatic transcription of educational content
-- **Meeting History** - Complete record of all learning sessions
-- **Progress Tracking** - Detailed analytics on student learning progress
-
-### 🔍 Advanced Search & Discovery
-- **Transcript Search** - Search through session transcripts for specific topics
-- **Content Discovery** - AI-recommended learning materials
-- **Knowledge Base** - Searchable repository of solved problems
-
-### 💳 Monetization & Subscriptions
-- **Razorpay Subscriptions** - Flexible subscription management
-- **Tiered Access** - Different subscription levels for various features
-- **Payment Processing** - Secure payment handling
-
-### ⚙️ Background Processing
-- **Inngest Background Jobs** - Asynchronous processing for AI tasks
-- **Content Generation** - Automated creation of learning materials
-- **Analytics Processing** - Background computation of learning insights
-
-### 🧑‍💻 Development Workflow
-- **CodeRabbit PR Reviews** - AI-assisted code review process
-- **Automated Testing** - Comprehensive test coverage
-- **CI/CD Pipeline** - Automated deployment workflows
-
-## 📦 Installation
-
-### Prerequisites
-- Node.js 18+ 
-- PostgreSQL database (Neon recommended)
-- npm or yarn
-
-### Setup Instructions
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/edclarity-ai.git
-   cd edclarity-ai
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Variables**
-   Create a `.env.local` file in the root directory:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://username:password@localhost:5432/edclarity"
-   
-   # Authentication (Better Auth)
-   AUTH_SECRET="your-secret-key"
-   AUTH_URL="http://localhost:3000"
-   
-   # OAuth Providers
-   GOOGLE_CLIENT_ID="your-google-client-id"
-   GOOGLE_CLIENT_SECRET="your-google-client-secret"
-   GITHUB_CLIENT_ID="your-github-client-id"
-   GITHUB_CLIENT_SECRET="your-github-client-secret"
-   
-   # OpenAI (Future Integration)
-   OPENAI_API_KEY="your-openai-api-key"
-   
-   # Stream (Future Integration)
-   STREAM_API_KEY="your-stream-api-key"
-   STREAM_API_SECRET="your-stream-api-secret"
-   
-   # Razorpay (Future Integration)
-   RAZORPAY_KEY_ID="your-razorpay-key-id"
-   RAZORPAY_KEY_SECRET="your-razorpay-key-secret"
-   RAZORPAY_WEBHOOK_SECRET="your-razorpay-webhook-secret"
-   ```
-
-4. **Database Setup**
-   ```bash
-   # Run database migrations
-   npm run db:migrate
-   
-   # Generate new migration (if needed)
-   npm run db:generate
-   ```
-
-5. **Start the development server**
-   ```bash
-   npm run dev
-   ```
-
-6. **Open your browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## 🗄️ Database Schema
-
-### Users Table
-```sql
-CREATE TABLE users (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255),
-  email VARCHAR(255) UNIQUE,
-  created_at TIMESTAMP DEFAULT NOW(),
-  updated_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-### Notify People Table
-```sql
-CREATE TABLE notify_people (
-  id SERIAL PRIMARY KEY,
-  email VARCHAR(255) UNIQUE,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-### Future Tables (AI Agents & Sessions)
-```sql
--- AI Agents Table
-CREATE TABLE ai_agents (
-  id SERIAL PRIMARY KEY,
-  name VARCHAR(255),
-  subject VARCHAR(255),
-  description TEXT,
-  capabilities JSONB,
-  created_at TIMESTAMP DEFAULT NOW()
-);
-
--- Learning Sessions Table
-CREATE TABLE learning_sessions (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id),
-  agent_id INTEGER REFERENCES ai_agents(id),
-  title VARCHAR(255),
-  status VARCHAR(50),
-  transcript TEXT,
-  summary TEXT,
-  recording_url VARCHAR(500),
-  created_at TIMESTAMP DEFAULT NOW()
-);
-```
-
-## 🔌 API Endpoints
-
-### Current Endpoints
-
-#### POST `/api/notify`
-Add an email to the notification list.
-
-**Request:**
-```json
-{
-  "email": "user@example.com"
-}
-```
-
-**Response:**
-- `200` - Email added successfully
-- `409` - Email already exists
-- `400` - Invalid email format
-
-
-#### AI Agents
-- `GET /api/agents` - List all AI agents
-- `POST /api/agents` - Create new AI agent
-- `GET /api/agents/:id` - Get specific agent details
-- `PUT /api/agents/:id` - Update agent
-- `DELETE /api/agents/:id` - Delete agent
-
-#### Learning Sessions
-- `GET /api/sessions` - List user's learning sessions
-- `POST /api/sessions` - Start new learning session
-- `GET /api/sessions/:id` - Get session details
-- `PUT /api/sessions/:id` - Update session
-- `POST /api/sessions/:id/transcript` - Generate transcript
-- `POST /api/sessions/:id/summary` - Generate summary
-
-## 🧪 Testing
-
-### Manual Testing Checklist
-
-#### Current Features
-- [ ] Authentication (sign up, sign in, social login)
-- [ ] Landing page email collection
-- [ ] Duplicate email prevention
-- [ ] Responsive design across devices
-- [ ] Form validation and error handling
-
-#### Future Features (To Be Implemented)
-- [ ] AI agent creation and management
-- [ ] Learning session initiation
-- [ ] Real-time video calls
-- [ ] Transcript generation
-- [ ] Session summaries
-- [ ] Search functionality
-- [ ] Subscription management
-
-### Unit Testing
-```bash
-# Run tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-## 📱 Responsive Design
-
-The application is optimized for:
-- **Mobile**: iPhone SE (375px), Samsung S8+ (1440px)
-- **Tablet**: iPad (768px)
-- **Desktop**: 1024px+
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-1. Connect your GitHub repository to Vercel
-2. Set environment variables in Vercel dashboard
-3. Deploy automatically on push to main branch
-
-### Other Platforms
-- **Railway**: Good for full-stack apps with database
-- **Netlify**: Frontend-focused deployment
-- **DigitalOcean**: Manual deployment with full control
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request (AI-assisted reviews with CodeRabbit)
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-If you encounter any issues:
-1. Check the [Issues](https://github.com/yourusername/edclarity-ai/issues) page
-2. Create a new issue with detailed description
-3. Contact the development team
-
-## 🎯 Vision
-
-EdClarity.ai aims to democratize education by providing:
-- **Personalized Learning** - AI agents that adapt to individual learning styles
-- **24/7 Availability** - Round-the-clock doubt-solving assistance
-- **Scalable Education** - Quality education accessible to students worldwide
-- **Data-Driven Insights** - Analytics to improve learning outcomes
+An AI-native educational ecosystem combining an enterprise **Learning Management System (LMS)**, **Teacher Creator Studio (85% Revenue Share)**, **LibraAI Hybrid RAG Assistant**, **Persona Mode Co-Teachers**, **Gamified Clarities & Spaced Repetition**, and a hardened **Olympus-EdC-v1 AI Orchestration Gateway**.
 
 ---
 
-Made with ❤️ using Next.js, Tailwind, and AI-powered educational technology.
+## 🏛️ Olympus-EdC-v1 Proprietary AI Model Suite
+
+EdClarity v2.0.0 is powered by the **Olympus-EdC-v1** multi-model orchestration runtime, dynamically routed by query complexity with automatic failover and circuit breakers:
+
+| Public Codename | Role & Capability |
+| :--- | :--- |
+| **`Athena-EdC-v1`** | Primary Balanced LLM for Persona Co-Teachers, LibraAI RAG synthesis, and interactive tutoring |
+| **`Hermes-EdC-v1`** | Ultra-Fast Sub-50ms Instant LLM for low-latency chat, quick classifications, and guardrails |
+| **`Apollo-EdC-v1`** | Deep Reasoning & Flagship Pro LLM for complex multi-step derivations, proofs, and grading |
+| **`Prometheus-EdC-v1`** | Structured JSON Engine for Clarities course generation, Daily Quizzes, and Flashcards |
+| **`Zelos-EdC-v1` / `Iris-EdC-v1`** | Multimodal & High-Availability Failover Pool with automated circuit-breaker recovery |
+| **`Mnemosyne-EdC-v1`** | Semantic Vector Embeddings & Cross-Encoder Reranking for LibraAI hybrid retrieval |
+| **`Metis-EdC-v1`** | Local Document Synthesis Engine for offline/private document processing |
+
+---
+
+## 🚀 Key Platform Capabilities (v2.0.0)
+
+### 1. Enterprise AI Hardening & System Architecture
+- **AI Gateway (`src/lib/ai/gateway.ts`)**: Token-bucket rate limiting (per-user & per-IP), concurrency caps, daily token/cost budget enforcement, and automatic request trace IDs.
+- **2-Stage Guardrails v2 (`src/lib/ai/guardrails.ts`)**: Unicode NFKC normalization, zero-width stripping, prompt-injection & jailbreak detection, automatic **PII Redaction** (emails, phone numbers, SSNs, Aadhaar, PAN, payment cards, API keys), and groundedness verification.
+- **2-Level Semantic Cache (`src/lib/ai/semantic-cache.ts`)**: L1 exact SHA-256 cache + L2 `Mnemosyne-EdC-v1` 256-dim cosine similarity cache (`>= 0.93` threshold) with tenant isolation.
+- **Complexity Router & 3-Provider Failover Pool (`src/lib/ai/router.ts`, `providers.ts`)**: Dynamic routing across `fast`, `balanced`, and `reasoning` tiers with exponential backoff, jitter, and per-provider circuit breakers.
+- **Human-in-the-Loop (HITL) Review Queue (`/admin/review`)**: Automated risk scoring and admin escalation queue to approve, edit, or reject flagged AI outputs.
+- **Real-Time AI Observability (`/admin/observability`)**: Live execution trace stream, `p50` / `p95` / `p99` latency percentiles, cache hit rates, token cost tracking, and automated anomaly alerts.
+
+### 2. Full-Featured LMS Marketplace & Teacher Studio
+- **Course Marketplace (`/courses`)**: Browse categories, preview free chapters, enroll in courses, and track chapter-by-chapter video completion (`lmsProgress`).
+- **Teacher Course Studio (`/teacher/courses`)**: Create courses, upload Mux-powered HD video chapters (`muxData`), attach study PDFs on Cloudflare R2, and publish to students.
+- **Creator Economy & Dodo Payments (`/teacher/earnings`)**: Live checkout integration via **Dodo Payments** with an automated **85% Teacher / 15% Platform** revenue split (`teacherEarnings`) and **EdClarity Pro** subscriptions.
+- **Encrypted RBAC Role Switching**: Cryptographically verified (`PBKDF2-SHA256` + `timingSafeEqual`) role elevation modals for switching between **Student**, **Teacher**, and **SuperAdmin** modes.
+
+### 3. LibraAI Hybrid RAG & 10-Feature Learning-to-Rank
+- **Hybrid Retrieval**: Combines dense vector search (`Mnemosyne-EdC-v1`) + BM25 lexical search with Reciprocal Rank Fusion (RRF).
+- **10-Feature Learning-to-Rank (`ranking/ltr.py`)**: Reranks candidate chunks using dense cosine, BM25 score, cross-encoder score, query term coverage, exact phrase match, title match, freshness decay, chunk length quality, source authority, and historical click/citation CTR.
+- **Transactional Outbox CDC (`src/lib/ai/cdc.ts`)**: Keeps Neon PostgreSQL, Cloudflare R2, and OpenSearch vector indices synchronized via background Inngest workers (`cdc-dispatcher`, `process-pdf`).
+
+### 4. Persona Mode, Clarities & Meeting Intelligence
+- **Persona Mode (`/persona`)**: Course-specific channels (`#general`, `#live-q-and-a`, `#ai-notetaker-summary`) with an embedded `Athena-EdC-v1` AI Co-Teacher and one-click class study guide generation.
+- **Clarities & Spaced Repetition (`/clarities`)**: Gamified AI-generated micro-courses, SM-2 spaced repetition flashcards, and Daily AI Quizzes.
+- **Live Video Meetings (`/meetings`)**: Stream Video SDK classrooms with AI Tutors, automatic transcription, and post-session summaries.
+- **Interactive Legal Hub (`/terms` & `/privacy`)**: Searchable Terms of Service and Privacy Policy pages with scroll-spy navigation, section link copying, and print views.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 16 (App Router, Turbopack), React 19, TypeScript, Tailwind CSS v4, Shadcn UI, Recharts, TanStack Query + tRPC
+- **Backend & Database**: Next.js Serverless Routes, tRPC, Drizzle ORM, Neon Serverless PostgreSQL, Redis / Upstash KV
+- **AI & Search**: `Olympus-EdC-v1` Orchestrator, FastAPI (`LibraRAG`), OpenSearch, Langfuse Telemetry, Inngest Durable Workflows
+- **Media & Payments**: Mux Video Streaming, Stream Video SDK, Cloudflare R2 (S3-compatible storage), Dodo Payments
+- **Authentication**: Better Auth (Email + 6-digit Nodemailer OTP Verification, Google & GitHub OAuth, Encrypted RBAC)
+
+---
+
+## 📦 Quick Start
+
+### 1. Install Dependencies
+```bash
+cd edclarity-ai
+npm install
+```
+
+### 2. Configure Environment Variables (`.env`)
+Configure your Neon `DATABASE_URL`, `BETTER_AUTH_SECRET`, OAuth keys, `SMTP_USER` / `SMTP_PASS` (for OTP emails), Cloudflare R2 credentials, Mux keys, Dodo Payments keys, and AI provider keys in `edclarity-ai/.env`.
+
+### 3. Push Database Schema
+```bash
+npx drizzle-kit push
+```
+
+### 4. Run Development Servers
+```bash
+# Start Next.js frontend & API
+npm run dev
+
+# (Optional) Start Inngest background worker dev server
+npx inngest-cli@latest dev
+```
+
+Navigate to [http://localhost:3000](http://localhost:3000).
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

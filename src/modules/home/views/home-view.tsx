@@ -9,7 +9,7 @@ import { authClient } from "@/lib/auth-client";
 import CircularProgress from '@mui/material/CircularProgress';
 
 export default function HomePageView() {
-    const fullText = "EdClarity.ai is launching soon!";
+    const fullText = "EdClarity.ai has now entered beta stage!";
     const [displayedText, setDisplayedText] = useState("");
     const [email, setEmail] = useState("");
     const [showInput, setShowInput] = useState(false);
@@ -115,7 +115,7 @@ export default function HomePageView() {
             )}
 
             <p className="text-xs text-muted-foreground mt-8 opacity-70">
-                Made with 💡 using Next.js, Tailwind, and clarity-driven design.
+                
             </p>
         </main>
 

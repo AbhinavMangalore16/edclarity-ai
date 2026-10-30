@@ -1,4 +1,7 @@
 import { auth } from '@/lib/auth';
+import { db } from '@/db';
+import { user } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { initTRPC, TRPCError } from '@trpc/server';
 import { headers } from 'next/headers';
 import { cache } from 'react';
@@ -30,4 +33,26 @@ export const protectedProcedure = baseProcedure.use(async({ctx, next})=>{
    throw new TRPCError({code:"UNAUTHORIZED", message: "Unauthorized!!"}) 
   }
   return next({ctx: {...ctx, auth:session} })
-})
+});
+
+export const teacherProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const dbUser = await db.query.user.findFirst({
+    where: eq(user.id, ctx.auth.user.id),
+  });
+  const userRole = dbUser?.role || (ctx.auth.user as any)?.role || 'student';
+  if (userRole !== 'teacher' && userRole !== 'admin') {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Teacher or Admin role required.' });
+  }
+  return next({ ctx });
+});
+
+export const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
+  const dbUser = await db.query.user.findFirst({
+    where: eq(user.id, ctx.auth.user.id),
+  });
+  const userRole = dbUser?.role || (ctx.auth.user as any)?.role || 'student';
+  if (userRole !== 'admin') {
+    throw new TRPCError({ code: 'FORBIDDEN', message: 'Admin role required.' });
+  }
+  return next({ ctx });
+});

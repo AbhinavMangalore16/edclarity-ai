@@ -23,6 +23,9 @@ import { CustomAvatar } from "@/components/extras/custom-avatar";
 import { useState } from "react";
 import { Selection } from "@/components/extras/selection";
 import { AgenticDialog } from "@/components/custom/agentic-dialog";
+import { useProModal } from "@/hooks/use-pro-modal";
+import { MEETINGS_PRESETS } from "@/config/presets";
+import { PresetSelector } from "@/components/extras/preset-selector";
 
 interface MeetingFormProps {
   onSuccess?: (id?: string) => void;
@@ -35,6 +38,9 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
   const queryClient = useQueryClient();
   const [openAgentic, setOpenAgentic] = useState(false);
   const [searchAgent, setSearchAgent] = useState("");
+  const proModal = useProModal();
+  const { data: currentUser } = useQuery(trpc.lms.getCurrentUser.queryOptions());
+  const canManage = currentUser?.role === "teacher" || currentUser?.role === "admin";
   const agentis = useQuery(
     trpc.agents.getMany.queryOptions({pageSize: 10, search: searchAgent}),
   )
@@ -48,7 +54,12 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
         onSuccess?.(data.id);
       },
       onError: (error) => {
-        toast.error(`Failed to create meeting: ${error.message}`);
+        if (error.message === "LIMIT_MEETINGS") {
+            proModal.onOpen("meetings");
+            // Optionally close form if needed
+        } else {
+            toast.error(`Failed to create meeting: ${error.message}`);
+        }
       },
     })
   );
@@ -110,9 +121,13 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Meeting Name</FormLabel>
+              <FormLabel>Meeting Topic</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="Studying..." />
+                <PresetSelector
+                  categories={MEETINGS_PRESETS}
+                  selectedValue={field.value}
+                  onSelect={(value) => field.onChange(value)}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -139,10 +154,16 @@ export const MeetingForm = ({ onSuccess, onCancel, initValues }: MeetingFormProp
                 }))} placeholder="Select an agent" onSearch={setSearchAgent} value={field.value} onSelect={field.onChange} />
               </FormControl>
               <FormDescription>
-                Didn&apos;t find an agent?
-                <Button type="button" variant="link" className="p-0 ml-1 text-primary hover:underline" onClick={() => setOpenAgentic(true)}>
-                  Create a new one here!
-                </Button>
+                {canManage ? (
+                  <>
+                    Didn&apos;t find an agent?
+                    <Button type="button" variant="link" className="p-0 ml-1 text-primary hover:underline" onClick={() => setOpenAgentic(true)}>
+                      Create a new one here!
+                    </Button>
+                  </>
+                ) : (
+                  "Select an instructor-configured EdTutor for your live learning session."
+                )}
               </FormDescription>
               <FormMessage />
             </FormItem>

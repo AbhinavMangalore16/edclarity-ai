@@ -11,10 +11,18 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { DEFAULT_PAGE } from "@/constants";
 
 
+import { useTRPC } from "@/trpc/client";
+import { useQuery } from "@tanstack/react-query";
+
 export const MeetingListAdd = () => {
+  const trpc = useTRPC();
   const [isMeetingDialogOpen, setIsMeetingDialogOpen] = useState(false);
   const [filters, setFilters] = useMeetingFilter();
   const isFilterActive = !!filters.status || !!filters.search || !!filters.agentId;
+
+  const { data: currentUser } = useQuery(trpc.lms.getCurrentUser.queryOptions());
+  const isTeacherOrAdmin = currentUser?.role === "teacher" || currentUser?.role === "admin";
+
   const onClearFilter = () =>{
     setFilters({
       status: null,
@@ -28,10 +36,12 @@ export const MeetingListAdd = () => {
       <MeetingDialog open={isMeetingDialogOpen} onOpenChange={setIsMeetingDialogOpen} />
       <div className="flex items-center justify-between mb-4 px-4 py-2 md:px-8">
         <h3 className="text-lg font-semibold text-gray-800">Your Meetings</h3>
-        <Button type="button" className="flex items-center gap-2" onClick={() => { setIsMeetingDialogOpen(true) }}>
-          <PlusIcon className="w-4 h-4" />
-          Add New Meeting
-        </Button>
+        {isTeacherOrAdmin && (
+          <Button type="button" className="flex items-center gap-2" onClick={() => { setIsMeetingDialogOpen(true) }}>
+            <PlusIcon className="w-4 h-4" />
+            Add New Meeting
+          </Button>
+        )}
       </div>
       <ScrollArea>
       <div className="flex flex-wrap items-center gap-2 ml-4 p-4">

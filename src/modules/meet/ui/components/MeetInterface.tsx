@@ -1,35 +1,43 @@
-import { DefaultVideoPlaceholder, StreamTheme, StreamVideoParticipant, useCall } from "@stream-io/video-react-sdk";
+"use client"
 import { useState } from "react";
 import { Lobby } from "./Lobby";
-import { authClient } from "@/lib/auth-client";
-import { genAvatarURI } from "@/lib/avatargen";
 import { InCall } from "./InCall";
 import { Finish } from "./Finish";
+import { useAgentChat } from "@/hooks/useAgentChat";
 
 interface MeetInterfaceProps{
+    meetingId: string;
     meetingName: string;
+    meetingTopic?: string;
 }
 
-
-export const MeetInterface = ({meetingName}: MeetInterfaceProps) =>{
-    const meet = useCall();
+export const MeetInterface = ({meetingId, meetingName, meetingTopic}: MeetInterfaceProps) =>{
     const [show, setShow] = useState<"lobby"|"call"|"ended">("lobby");
+    const chat = useAgentChat(meetingId);
     
     const handleJoin = async () =>{
-        if (!meet) return;
-        await meet.join();
+        try {
+            await fetch('/api/meetings/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ meetingId })
+            });
+        } catch (err) {
+            console.error("Failed to mark meeting as started", err);
+        }
         setShow("call");
     }
+
     const handleLeave = async() =>{
-        if (!meet) return;
-        meet.endCall();
+        await chat.finishMeeting();
         setShow("ended");
     }
+
     return (
-        <StreamTheme className="h-full">
+        <div className="h-full w-full bg-[#1E164F] text-white">
             {show==="lobby" && <Lobby onJoin={handleJoin}/>}
-            {show==="call" && <InCall onLeave={handleLeave} meetingName={meetingName}/>}
+            {show==="call" && <InCall onLeave={handleLeave} meetingName={meetingName} meetingTopic={meetingTopic} chat={chat}/>}
             {show==="ended" &&<Finish/>}
-        </StreamTheme>
+        </div>
     )
 }

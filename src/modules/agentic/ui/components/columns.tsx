@@ -38,11 +38,14 @@ export const columns: ColumnDef<AgenticGetMany["data"][number], unknown>[] = [
   {
     accessorKey: "meetingCount",
     header: "Meetings",
-    cell: ({row}) => (
-      <Badge variant="outline" className="flex">
-        <VideoIcon className="text-green-800" />
-        {row.original.meetingCount} {row.original.meetingCount===1 ? "meeting": "meetings"}
-      </Badge>
-    ),
+    cell: ({row}) => {
+      const remaining = Math.max(0, 3 - row.original.meetingCount);
+      return (
+        <Badge variant={remaining === 0 ? "destructive" : "outline"} className="flex gap-x-2 w-fit">
+          <VideoIcon className={remaining === 0 ? "text-white" : "text-green-800"} />
+          {remaining} {remaining === 1 ? "meeting" : "meetings"} remaining
+        </Badge>
+      );
+    },
   },
 ];

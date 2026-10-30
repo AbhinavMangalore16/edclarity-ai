@@ -20,9 +20,13 @@ const MeetPage = async({params}: MeetProps)=>{
     }
 
     const queryClient = getQueryClient();
-    void queryClient.prefetchQuery(
-        trpc.meetings.getOne.queryOptions({id: meetingId}),
-    );
+    try {
+        await queryClient.prefetchQuery(
+            trpc.meetings.getOne.queryOptions({id: meetingId}),
+        );
+    } catch (err) {
+        console.warn("MeetPage: Prefetch meeting query failed for ID", meetingId, err);
+    }
 
     return (
         <HydrationBoundary state={dehydrate(queryClient)}>

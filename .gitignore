@@ -263,3 +263,19 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# AI Coding Assistants, Prompts & Audit Docs (Never Commit)
+.agents/
+.claude/
+.cursor/
+.gemini/
+.windsurf/
+CLAUDE.md
+AGENTS.md
+skills-lock.json
+*Audit*.md
+Auditing*
+fix-backticks.js
+build_output.txt
+myself.txt

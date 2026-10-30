@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { HeadsetIcon, SendIcon } from "lucide-react";
+import { HeadsetIcon, SendIcon, ShieldCheckIcon, FileTextIcon } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
 
 export default function SupportPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -96,6 +97,18 @@ export default function SupportPage() {
                 </>
               )}
             </Button>
+
+            <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
+              <Link href="/terms" className="flex items-center gap-1.5 hover:text-purple-600 hover:underline transition-colors">
+                <FileTextIcon className="w-3.5 h-3.5" />
+                Terms of Service
+              </Link>
+              <span>&bull;</span>
+              <Link href="/privacy" className="flex items-center gap-1.5 hover:text-purple-600 hover:underline transition-colors">
+                <ShieldCheckIcon className="w-3.5 h-3.5" />
+                Privacy Policy
+              </Link>
+            </div>
           </form>
         </CardContent>
       </Card>

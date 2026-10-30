@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useConfirm } from "../../hooks/useConfirm";
 import { UpdationAgenticDialog } from "@/components/custom/updation-agentic-dialog";
+import { AgentChat } from "../components/agent-chat";
 
 // Helper: Assign Tailwind color classes based on value
 const getPersonalityColor = (personality: string) => {
@@ -262,6 +263,14 @@ export const AgentIdView = ({ agentid }: AgentidViewProps) => {
                             )}
                         </section>
                     )}
+                </div>
+
+                {/* Agent Chat Section */}
+                <div className="mt-8">
+                    <AgentChat 
+                        agentId={agentid} 
+                        agentMetadata={`Name: ${data.name}\nInstructions: ${data.instructions}\nPersonality: ${metadata.personality}\nLevel: ${metadata.level}\nGoals: ${(metadata.goals || []).join(", ")}\nNotes: ${metadata.notes || ""}`} 
+                    />
                 </div>
             </div>
         </>

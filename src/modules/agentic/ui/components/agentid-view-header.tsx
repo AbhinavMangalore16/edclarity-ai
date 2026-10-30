@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ChevronRight, ChevronRightIcon, MoreVerticalIcon, PencilIcon, Trash, Trash2Icon } from "lucide-react";
 import Link from "next/link";
+import { useQuery } from "@tanstack/react-query";
+import { useTRPC } from "@/trpc/client";
 
 interface AgentIdViewHeaderProps {
     agentid: string,
@@ -12,13 +14,17 @@ interface AgentIdViewHeaderProps {
 }
 
 export const AgentIdViewHeader = ({ agentid, agentName, onEdit, onRemove }: AgentIdViewHeaderProps) => {
+    const trpc = useTRPC();
+    const { data: currentUser } = useQuery(trpc.lms.getCurrentUser.queryOptions());
+    const canManage = currentUser?.role === "teacher" || currentUser?.role === "admin";
+
     return (
         <div className="flex items-center justify-between">
             <Breadcrumb>
                 <BreadcrumbList>
                     <BreadcrumbItem>
                         <BreadcrumbLink asChild className="font-medium text-xl">
-                            <Link href="/agentic">My Agents</Link>
+                            <Link href="/agentic">EdTutors</Link>
                         </BreadcrumbLink>
                     </BreadcrumbItem>
                     <BreadcrumbSeparator className="text-foreground text-xl font-medium [&>svg]:size-4">
@@ -31,23 +37,25 @@ export const AgentIdViewHeader = ({ agentid, agentName, onEdit, onRemove }: Agen
                     </BreadcrumbItem>
                 </BreadcrumbList>
             </Breadcrumb>
-            <DropdownMenu modal={false}>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="ghost">
-                        <MoreVerticalIcon />
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={onEdit}>
-                        <PencilIcon className="size-3 text-blue-950" />
-                        Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={onRemove}>
-                        <Trash className="size-3 text-red-950" />
-                        Remove
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+            {canManage && (
+                <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost">
+                            <MoreVerticalIcon />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={onEdit}>
+                            <PencilIcon className="size-3 text-blue-950" />
+                            Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={onRemove}>
+                            <Trash className="size-3 text-red-950" />
+                            Remove
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            )}
         </div>
     )
 }

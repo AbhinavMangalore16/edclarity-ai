@@ -16,9 +16,13 @@ interface PageProps{
 const Page = async ({params}: PageProps) => {
   const {meetingId} = await params;
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(
-    trpc.meetings.getOne.queryOptions({id: meetingId})
-  );
+  try {
+    await queryClient.prefetchQuery(
+      trpc.meetings.getOne.queryOptions({id: meetingId})
+    );
+  } catch (err) {
+    console.warn("MeetingsPage: Prefetch meeting query failed for ID", meetingId, err);
+  }
   return (
             <HydrationBoundary state={dehydrate(queryClient)}>
                 <Suspense fallback={<LoadingDisplay title="Loading your meeting" description="Hold on tight! This might take a while..." />}>

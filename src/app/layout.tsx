@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { TRPCReactProvider } from "@/trpc/client";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-
+import { ProModal } from "@/components/custom/pro-modal";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -34,8 +34,10 @@ export default function RootLayout({
     <TRPCReactProvider>
       <html lang="en" suppressHydrationWarning>
         <body
+          suppressHydrationWarning
           className={`${geistSans.variable} ${geistMono.variable} ${sora.variable} antialiased`}
         >
+          <ProModal />
           <Toaster/>
           {children}
           <Analytics />

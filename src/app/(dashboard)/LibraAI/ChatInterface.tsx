@@ -2,15 +2,16 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import ReactMarkdown from 'react-markdown';
-import { chatWithAgent, checkHealth, triggerIngestion, uploadDocument, BASE_URL } from "./apiService";
+import { chatWithAgent, checkHealth, triggerIngestion, uploadDocument, ingestFromR2, BASE_URL } from "./apiService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, User, RefreshCw, FileText, Activity, AlertCircle, Database, ServerCog, BugPlay, Upload } from "lucide-react";
+import { Bot, User, RefreshCw, FileText, Activity, AlertCircle, Database, ServerCog, BugPlay, Upload, Eye, ExternalLink } from "lucide-react";
 import RuixenQueryBox from "@/components/ui/ruixen-query-box";
 import { MetricsBoard } from "@/components/ui/metrics-board";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { authClient } from "@/lib/auth-client";
+import { useProModal } from "@/hooks/use-pro-modal";
 
 interface Metrics {
   faithfulness: number;
@@ -29,6 +30,130 @@ interface ChatMessage {
   metrics?: Metrics;
   performance_metrics?: PerformanceMetrics;
 }
+const TypewriterMessage = ({
+  content = "",
+  isLatest,
+  uploadedFiles,
+}: {
+  content?: string;
+  isLatest: boolean;
+  uploadedFiles: { id: string; name: string }[];
+}) => {
+  const safeContent = content ?? "";
+  const [displayedText, setDisplayedText] = useState(isLatest ? "" : safeContent);
+  const [isTyping, setIsTyping] = useState(isLatest);
+
+  useEffect(() => {
+    if (!isLatest || !safeContent) {
+      setDisplayedText(safeContent);
+      setIsTyping(false);
+      return;
+    }
+
+    let index = 0;
+    const chunkSize = 4;
+    const intervalTime = 12;
+
+    const timer = setInterval(() => {
+      index += chunkSize;
+      if (index >= safeContent.length) {
+        setDisplayedText(safeContent);
+        setIsTyping(false);
+        clearInterval(timer);
+      } else {
+        setDisplayedText(safeContent.slice(0, index));
+      }
+    }, intervalTime);
+
+    return () => clearInterval(timer);
+  }, [safeContent, isLatest]);
+
+  // Strip raw backend localhost URLs (http://localhost:8001/files/ -> paper.pdf)
+  let cleanedContent = (displayedText || "")
+    .replace(/http:\/\/localhost:8001\/files\//gi, "")
+    .replace(/http:\/\/localhost:8000\/files\//gi, "");
+
+  // Process line-by-line to convert plain text citations into Markdown links
+  const lines = cleanedContent.split("\n");
+  const processedLines = lines.map((line) => {
+    return line.replace(
+      /(?:📌\s*)?\[?(Source\s*\d*)\]?\s*([a-zA-Z0-9_\-\.]+\.pdf)\s*(?:\(Page\s*(\d+)\))?/gi,
+      (match, srcTag, pdfName, pageNum) => {
+        const trimmedPdf = pdfName.trim();
+        const tagText = srcTag ? srcTag.trim() : "";
+        const badgeLabel = `${tagText ? tagText + " • " : ""}${trimmedPdf}${pageNum ? ` (Page ${pageNum})` : ""}`;
+        
+        return `📌 ${badgeLabel}`;
+      }
+    );
+  });
+
+  const processedContent = processedLines.join("\n");
+
+  return (
+    <div className="whitespace-pre-wrap leading-relaxed relative">
+      <ReactMarkdown
+        components={{
+          a: ({ node, href, children, ...props }) => {
+            let rawHref = href || "#";
+            let finalUrl = "#";
+
+            const isBackendFilesUrl =
+              rawHref.includes(":8001/files/") ||
+              rawHref.includes(":8000/files/") ||
+              rawHref.includes("/files/");
+
+            if (isBackendFilesUrl || !rawHref.startsWith("http")) {
+              const [basePath, pageHash] = rawHref.split("#");
+              const cleanName = basePath.split("/").pop() || basePath;
+
+              let pageNumHash = pageHash ? `#${pageHash}` : "";
+              const childrenStr = Array.isArray(children)
+                ? children.join(" ")
+                : String(children || "");
+              const pageMatch = childrenStr.match(/Page\s*(\d+)/i);
+              if (!pageNumHash && pageMatch) {
+                pageNumHash = `#page=${pageMatch[1]}`;
+              }
+
+              if (uploadedFiles.length > 0) {
+                const latestDoc = uploadedFiles[uploadedFiles.length - 1];
+                finalUrl = `/api/docs/view/${latestDoc.id}${pageNumHash}`;
+              } else {
+                finalUrl = `/api/documents/proxy?name=${encodeURIComponent(cleanName)}${pageNumHash}`;
+              }
+            } else {
+              finalUrl = rawHref;
+            }
+
+            const childrenText = Array.isArray(children)
+              ? children.join(" ")
+              : String(children || "");
+            const displayBadge = childrenText.startsWith("📌") ? childrenText : `📌 ${childrenText}`;
+
+            return (
+              <a
+                href={finalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/60 font-semibold border border-purple-200 dark:border-purple-800/50 text-xs transition-all cursor-pointer group shadow-sm my-1 hover:scale-105"
+                title="Click to view cited document page in new tab"
+              >
+                <span>{displayBadge}</span>
+                <ExternalLink className="w-3.5 h-3.5 opacity-70 group-hover:opacity-100 transition-opacity" />
+              </a>
+            );
+          }
+        }}
+      >
+        {processedContent}
+      </ReactMarkdown>
+      {isTyping && (
+        <span className="inline-block w-2 h-4 bg-purple-500 dark:bg-purple-400 animate-pulse ml-1 align-middle rounded-sm" />
+      )}
+    </div>
+  );
+};
 
 export const ChatInterface = () => {
   const [sessionId, setSessionId] = useState<string>("");
@@ -44,6 +169,7 @@ export const ChatInterface = () => {
   const [isPersonalized, setIsPersonalized] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const proModal = useProModal();
 
   const { data: session } = authClient.useSession();
 
@@ -94,7 +220,7 @@ export const ChatInterface = () => {
     setLoading(true);
 
     try {
-      const data = await chatWithAgent(query, sessionId, userId, isPersonalized);
+      const data = await chatWithAgent(query, sessionId, userId, isPersonalized, testMode);
       const agentMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "agent",
@@ -140,30 +266,66 @@ export const ChatInterface = () => {
     const userMessage: ChatMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: `📎 Uploading document: ${file.name}...`,
+      content: `📎 Uploading document: ${file.name} to R2 Data Lake...`,
     };
     setMessages((prev) => [...prev, userMessage]);
 
     try {
-      await uploadDocument(file, userId);
+      // 1. Get Presigned URL from our Next.js backend
+      const res = await fetch("/api/documents/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ filename: file.name, contentType: file.type }),
+      });
+
+      if (res.status === 403) {
+        proModal.onOpen("uploads" as any);
+        throw new Error("Free tier limit reached.");
+      }
+
+      if (!res.ok) throw new Error("Failed to get upload URL");
+      
+      const { presignedUrl, document } = await res.json();
+
+      // 2. Upload directly to Cloudflare R2
+      const uploadRes = await fetch(presignedUrl, {
+        method: "PUT",
+        headers: { "Content-Type": file.type },
+        body: file,
+      });
+
+      if (!uploadRes.ok) throw new Error("Failed to upload to Cloudflare R2");
+
+      setMessages((prev) => [
+        ...prev,
+        { id: crypto.randomUUID(), role: "agent", content: `Upload complete. Indexing **${file.name}** into Vector Database... 🧠` }
+      ]);
+
+      // 3. Trigger ingestion from R2 to OpenSearch
+      const documentKey = document.key;
+      await ingestFromR2(documentKey, file.name, document.id);
 
       const agentMessage: ChatMessage = {
         id: crypto.randomUUID(),
         role: "agent",
-        content: `I've received your document **${file.name}**. The ingestion process has started in the background. You can now ask me questions about it!`,
+        content: `I've successfully indexed **${file.name}** into the RAG system! You can now ask questions about it. `,
       };
       setMessages((prev) => [...prev, agentMessage]);
 
-      setUploadedFiles((prev) => [...prev, { name: file.name, id: crypto.randomUUID() }]);
+      setUploadedFiles((prev) => [...prev, { name: file.name, id: document.id }]);
 
     } catch (error) {
       console.error("Upload Error:", error);
-      const agentMessage: ChatMessage = {
-        id: crypto.randomUUID(),
-        role: "agent",
-        content: `Sorry, there was an error uploading your document **${file.name}**. Please try again.`,
-      };
-      setMessages((prev) => [...prev, agentMessage]);
+      if (error instanceof Error && error.message === "Free tier limit reached.") {
+        // Just fail silently in chat as modal is open
+      } else {
+        const agentMessage: ChatMessage = {
+          id: crypto.randomUUID(),
+          role: "agent",
+          content: `Sorry, there was an error uploading your document **${file.name}** to R2. Please try again.`,
+        };
+        setMessages((prev) => [...prev, agentMessage]);
+      }
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -260,7 +422,7 @@ export const ChatInterface = () => {
                   </div>
                 </div>
               ) : (
-                messages.map((msg) => (
+                messages.map((msg, index) => (
                   <div
                     key={msg.id}
                     className={`flex gap-4 ${msg.role === "user" ? "justify-end" : "justify-start"}`}
@@ -279,36 +441,11 @@ export const ChatInterface = () => {
                           }`}
                       >
                         {msg.role === "agent" ? (
-                          <div className="whitespace-pre-wrap leading-relaxed">
-                            <ReactMarkdown
-                              components={{
-                                // Custom styling for links so they match your theme and open in a new tab
-                                a: ({ node, ...props }) => {
-                                let href = props.href || "";
-                                
-                                // Intercept backend local links and proxy them
-                                if (href.startsWith("http://localhost:8000")) {
-                                  const path = href.replace("http://localhost:8000", "");
-                                  href = `/api/proxy-document?path=${encodeURIComponent(path)}`;
-                                } else if (href.startsWith("/files/")) {
-                                  href = `/api/proxy-document?path=${encodeURIComponent(href)}`;
-                                }
-                                
-                                return (
-                                  <a
-                                    {...props}
-                                    href={href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-purple-600 dark:text-purple-400 hover:underline font-semibold"
-                                  />
-                                );
-                              }
-                              }}
-                            >
-                              {msg.content}
-                            </ReactMarkdown>
-                          </div>
+                          <TypewriterMessage
+                            content={msg.content}
+                            isLatest={index === messages.length - 1}
+                            uploadedFiles={uploadedFiles}
+                          />
                         ) : (
                           <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
                         )}
@@ -363,10 +500,18 @@ export const ChatInterface = () => {
               {uploadedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 px-2">
                   {uploadedFiles.map((f) => (
-                    <div key={f.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-medium border border-purple-200 dark:border-purple-800">
+                    <a
+                      key={f.id}
+                      href={`/api/documents/proxy?id=${f.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-800/50 text-xs font-medium border border-purple-200 dark:border-purple-800 transition-colors cursor-pointer group"
+                      title="Click to view PDF document in new tab"
+                    >
                       <FileText className="w-3.5 h-3.5" />
-                      {f.name}
-                    </div>
+                      <span>{f.name}</span>
+                      <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100 transition-opacity" />
+                    </a>
                   ))}
                 </div>
               )}
