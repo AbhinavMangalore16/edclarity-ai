@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user, verification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
+import { sendTransactionalEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,41 +44,25 @@ export async function POST(req: NextRequest) {
       expiresAt,
     });
 
-    // Use RESEND_SIGNUP_API_KEY if specified, otherwise fall back to RESEND_API_KEY
-    const resendApiKey = process.env.RESEND_SIGNUP_API_KEY || process.env.RESEND_API_KEY;
-
-    if (resendApiKey) {
-      try {
-        await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${resendApiKey}`,
-          },
-          body: JSON.stringify({
-            from: "EdClarity Verification <verify@edclarity.ai>",
-            to: normalizedEmail,
-            subject: `${otpCode} is your EdClarity Sign Up Verification Code`,
-            html: `
-              <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background: #020617; color: #f8fafc; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="text-align: center; margin-bottom: 20px;">
-                  <h2 style="font-size: 22px; margin: 0; color: #38bdf8;">EdClarity.ai</h2>
-                  <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Sign Up Email Verification</p>
-                </div>
-                <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
-                  <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">Hello ${name || "there"}, enter this code to verify your account:</p>
-                  <h1 style="font-size: 32px; letter-spacing: 8px; color: #38bdf8; margin: 12px 0; font-family: monospace;">${otpCode}</h1>
-                  <p style="font-size: 11px; color: #64748b; margin-top: 8px;">Code expires in 15 minutes.</p>
-                </div>
-                <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 24px;">If you did not request this code, please ignore this email.</p>
-              </div>
-            `,
-          }),
-        });
-      } catch (emailErr) {
-        console.warn("Failed to send signup verification email  :", emailErr);
-      }
-    }
+    await sendTransactionalEmail({
+      to: normalizedEmail,
+      fromName: "EdClarity Verification",
+      subject: `${otpCode} is your EdClarity Sign Up Verification Code`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background: #020617; color: #f8fafc; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h2 style="font-size: 22px; margin: 0; color: #38bdf8;">EdClarity.ai</h2>
+            <p style="color: #94a3b8; font-size: 13px; margin-top: 4px;">Sign Up Email Verification</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0;">
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 8px;">Hello ${name || "there"}, enter this code to verify your account:</p>
+            <h1 style="font-size: 32px; letter-spacing: 8px; color: #38bdf8; margin: 12px 0; font-family: monospace;">${otpCode}</h1>
+            <p style="font-size: 11px; color: #64748b; margin-top: 8px;">Code expires in 15 minutes.</p>
+          </div>
+          <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 24px;">If you did not request this code, please ignore this email.</p>
+        </div>
+      `,
+    });
 
     return NextResponse.json({
       success: true,

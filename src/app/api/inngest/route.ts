@@ -1,3 +1,7 @@
+if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+  delete process.env.INNGEST_DEV;
+}
+
 import { serve } from "inngest/next";
 import { inngest } from "../../../inngest/client";
 import { processMeetingSummary } from "../../../inngest/functions/meeting-processor";
@@ -10,6 +14,7 @@ import { cdcDispatcher, cdcReconcileNightly, ltrWeeklyRetrain } from "../../../i
 
 export const { GET, POST, PUT } = serve({
   client: inngest,
+  signingKey: process.env.INNGEST_SIGNING_KEY,
   functions: [
     processMeetingSummary,
     cleanupSoftDeletedAgents,
@@ -22,4 +27,3 @@ export const { GET, POST, PUT } = serve({
     ltrWeeklyRetrain,
   ],
 });
-

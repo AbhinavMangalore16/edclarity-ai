@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { user, verification } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import crypto from "crypto";
+import { sendTransactionalEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,21 +80,11 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Use RESEND_SIGNUP_API_KEY or RESEND_API_KEY securely from environment variables
-    const resendApiKey = process.env.RESEND_SIGNUP_API_KEY || process.env.RESEND_API_KEY;
-
-    try {
-      const emailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${resendApiKey}`,
-        },
-        body: JSON.stringify({
-          from: "EdClarity Authorization <onboarding@resend.dev>",
-          to: cleanEmail,
-          subject: `${otpCode} is your EdClarity Email Verification Code`,
-          html: `<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background: #0F0926; color: #ffffff; border-radius: 20px; border: 1px solid rgba(168,85,247,0.3);">
+    const delivery = await sendTransactionalEmail({
+      to: cleanEmail,
+      fromName: "EdClarity Authorization",
+      subject: `${otpCode} is your EdClarity Email Verification Code`,
+      html: `<div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; background: #0F0926; color: #ffffff; border-radius: 20px; border: 1px solid rgba(168,85,247,0.3);">
             <div style="text-align: center; margin-bottom: 20px;">
               <h2 style="color: #c084fc; margin: 0; font-size: 22px;">Authorize Your EdClarity Account</h2>
               <p style="color: #a78bfa; font-size: 13px; margin-top: 6px;">Please verify your email address to complete registration</p>
@@ -108,20 +99,10 @@ export async function POST(req: NextRequest) {
               Enter this code on the sign-up page to verify your email address. This code expires in 15 minutes.
             </p>
           </div>`,
-        }),
-      });
+    });
 
-      const resData = await emailRes.json();
-      if (emailRes.ok) {
-        emailSent = true;
-        console.log(`✅ [Resend API] Verification email sent to ${cleanEmail}. Email ID: ${resData.id}`);
-      } else {
-        console.warn(`⚠️ [Resend API Error]:`, resData);
-        resendStatusMessage = resData.message || "Resend API testing domain restriction.";
-      }
-    } catch (emailErr: any) {
-      console.error("Failed to call Resend email API:", emailErr.message);
-    }
+    emailSent = delivery.sent;
+    resendStatusMessage = delivery.error || "";
 
     return NextResponse.json({
       success: true,
