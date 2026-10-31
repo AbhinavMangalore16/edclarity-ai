@@ -247,8 +247,8 @@ export default function AuthView() {
     const signUpForm = useForm<z.infer<typeof signUpZodSchema>>({
         resolver: zodResolver(signUpZodSchema),
         defaultValues: {
-            name: " ",
-            email: " ",
+            name: "",
+            email: "",
             password: "",
             confirmPassword: ""
         }
@@ -345,13 +345,13 @@ export default function AuthView() {
             // Auto sign-in and redirect to dashboard
             if (payloadData.password) {
                 authClient.signIn.email(
-                    { email: payloadData.email, password: payloadData.password },
+                    { email: payloadData.email.trim().toLowerCase(), password: payloadData.password },
                     {
                         onSuccess: () => {
                             window.location.href = "/LibraAI";
                         },
                         onError: (ctx) => {
-                            console.warn("SignIn callback warning, performing direct redirect:", ctx.error);
+                            console.warn("SignIn callback notice, using session cookie from verify-signup-otp:", ctx.error);
                             window.location.href = "/LibraAI";
                         },
                     }
@@ -442,14 +442,14 @@ export default function AuthView() {
     const handleSignIn = (data: z.infer<typeof signInZodSchema>) => {
         setError(null);
         setPending(true);
-        authClient.signIn.email({ email: data.email, password: data.password }, {
+        authClient.signIn.email({ email: data.email.trim().toLowerCase(), password: data.password }, {
             onError: ({ error }) => {
                 setPending(false);
                 setError(error.message);
             },
             onSuccess: () => {
                 setPending(false);
-                alert("Signed in successfully");
+                toast.success("Signed in successfully!");
                 router.push("/LibraAI");
             },
         });

@@ -119,8 +119,8 @@ async function sendViaGmailSmtp(
 export async function sendTransactionalEmail(opts: SendOtpEmailOptions): Promise<SendOtpEmailResult> {
   const resendApiKey = process.env.RESEND_SIGNUP_API_KEY || process.env.RESEND_API_KEY;
   const resendFrom = process.env.RESEND_FROM_EMAIL || `${opts.fromName || "EdClarity Security"} <onboarding@resend.dev>`;
-  const smtpUser = process.env.SMTP_USER || process.env.GMAIL_USER;
-  const smtpPass = process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD;
+  const smtpUser = (process.env.SMTP_USER || process.env.GMAIL_USER || "").replace(/^["']|["']$/g, "").trim();
+  const smtpPass = (process.env.SMTP_PASS || process.env.GMAIL_APP_PASSWORD || "").replace(/^["']|["']$/g, "").trim();
 
   let resendError = "";
 
